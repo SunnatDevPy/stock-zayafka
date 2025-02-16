@@ -6,6 +6,7 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand
 
 from bot.handlers.start import start_router
+from bot.language import language_router
 from dispatcher import bot
 from models import db
 
@@ -24,7 +25,7 @@ async def on_shutdown(bot: Bot):
 
 async def main():
     dp = Dispatcher()
-    dp.include_routers(start_router)
+    dp.include_routers(start_router, language_router)
     dp.startup.register(on_start)
     dp.shutdown.register(on_shutdown)
     await dp.start_polling(bot)
