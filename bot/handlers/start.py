@@ -1,30 +1,22 @@
 from aiogram import Router
 from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from bot.buttuns.inline import menu
-from models import BotUser
+from bot.buttuns.inline import language_inl
 
 start_router = Router()
 
 
 @start_router.message(CommandStart())
-async def command_start(message: Message):
-    user = await BotUser.get(message.from_user.id)
-    if user:
-        if message.from_user.id in [5649321700, ]:
-            await message.answer("Assalomu aleykum hush kelibsiz",
-                                 reply_markup=menu(admin=True))
-        else:
-            await message.answer("Assalom aleykum hush kelibsiz",
-                                 reply_markup=menu())
+async def command_start(message: Message, state: FSMContext):
+    data = await state.get_data()
+    locale = data.get('locale')
+    if locale == 'rus':
+        til = "Выберите язык"
     else:
-        from_user = message.from_user
-        await BotUser.create(id=from_user.id, first_name=from_user.first_name, last_name=from_user.last_name,
-                             username=from_user.username)
-
-        await message.answer("Assalom aleykum hush kelibsiz",
-                             reply_markup=menu())
+        til = 'Til tanlang'
+    await message.answer(til, reply_markup=language_inl())
 
 #
 # @start_router.message(Contact.phone)
