@@ -7,6 +7,7 @@ from aiogram.types import BotCommand
 
 from bot.handlers.start import start_router
 from dispatcher import bot
+from models import db
 
 
 async def on_start(bot: Bot):
@@ -14,6 +15,7 @@ async def on_start(bot: Bot):
         BotCommand(command='start', description="Bo'tni ishga tushirish")
     ]
     await bot.set_my_commands(commands=commands_admin)
+    await db.create_all()
 
 
 async def on_shutdown(bot: Bot):

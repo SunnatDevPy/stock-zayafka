@@ -20,8 +20,8 @@ async def command_start(message: Message):
                                  reply_markup=menu())
     else:
         from_user = message.from_user
-        user = await BotUser.create(id=from_user.id, first_name=from_user.first_name, last_name=from_user.last_name,
-                                    username=from_user.username, day_and_night=True)
+        await BotUser.create(id=from_user.id, first_name=from_user.first_name, last_name=from_user.last_name,
+                             username=from_user.username, day_and_night=True)
 
         await message.answer("Assalom aleykum hush kelibsiz",
                              reply_markup=menu())
