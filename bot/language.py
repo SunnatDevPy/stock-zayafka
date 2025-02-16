@@ -2,7 +2,7 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from buttuns.inline import menu
+from bot.buttuns.inline import menu
 from models import BotUser
 
 language_router = Router()
