@@ -232,6 +232,11 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         else:
             await state.set_state(ZayafkaState.photo)
             await call.message.answer(text="Rasm jo'nating")
+    if data[1] == 'delete':
+        await call.message.delete()
+        await Channels.delete(int(data[-1]))
+        channels_ = await Channels.all()
+        await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
 
 
 @admin_router.message(ZayafkaState.photo)
@@ -284,7 +289,8 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         except:
             await call.message.delete()
             await call.message.edit_text("Settings", reply_markup=settings())
-
+    if data == 'change':
+        pass
 
 @admin_router.message(ForwardState.text)
 async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
