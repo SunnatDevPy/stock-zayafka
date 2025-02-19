@@ -10,7 +10,7 @@ from bot.handlers.admin import admin_router
 from bot.handlers.start import start_router
 from bot.language import language_router
 from dispatcher import bot
-from models import db, TextInSend
+from models import db, TextInSend, Channels
 
 
 async def on_start(bot: Bot):
@@ -26,13 +26,14 @@ async def on_shutdown(bot: Bot):
 
 
 async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
+    channel = await Channels.get(chat_join.chat.id)
     text: TextInSend = await TextInSend.get(1)
-    if text:
-        await bot.send_message(chat_id=chat_join.from_user.id, text=text.text, reply_markup=link(text.link))
-    else:
-        await bot.send_message(chat_id=chat_join.from_user.id, text="xush kelibsiz")
-
-    await chat_join.approve()
+    if channel.status:
+        if text:
+            await bot.send_message(chat_id=chat_join.from_user.id, text=text.text, reply_markup=link(text.link))
+        else:
+            await bot.send_message(chat_id=chat_join.from_user.id, text="xush kelibsiz")
+        await chat_join.approve()
 
 
 async def main():
