@@ -2,7 +2,7 @@ from aiogram import Bot, F, Router, html
 from aiogram.enums import ChatMemberStatus
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import CallbackQuery, Message, Chat, ChatMemberUpdated
+from aiogram.types import CallbackQuery, Message, ChatMemberUpdated
 
 from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add
 from models import BotUser, Channels, TextInSend
