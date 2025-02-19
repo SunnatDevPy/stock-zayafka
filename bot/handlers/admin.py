@@ -61,9 +61,16 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
-            await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
+            try:
+                await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
+            except:
+                await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
+
         else:
-            await call.message.edit_text(text="Kanallarga bot qo'shilmagan", reply_markup=await channels(channels_))
+            try:
+                await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
+            except:
+                await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
     elif data == 'back':
         await call.message.answer(text='Bosh menu', reply_markup=menu(admin=True))
 
@@ -273,8 +280,6 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     await state.clear()
 
 
-#
-#
 # @admin_router.message(ZayafkaState.text)
 # async def leagues_handler(message: Message, state: FSMContext):
 #     await state.set_state(ZayafkaState.link)
