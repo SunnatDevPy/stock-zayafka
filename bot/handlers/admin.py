@@ -201,8 +201,6 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
 # ==========
 class ZayafkaState(StatesGroup):
     photo = State()
-    text = State()
-    link = State()
 
 
 @admin_router.callback_query(F.data.startswith('channels_'))
@@ -235,7 +233,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         await call.message.delete()
         if channel.text:
             await call.message.answer_photo(photo=channel.photo, caption=channel.text,
-                                            reply_markup=detail_message_channel(channel.chat_id, channel.link))
+                                            reply_markup=detail_message_channel(channel.chat_id, channel.buttons))
         else:
             await state.set_state(ZayafkaState.photo)
             await call.message.answer(text="Tayyor malumotni jo'nating")
@@ -311,7 +309,7 @@ class ForwardState(StatesGroup):
 
 @admin_router.callback_query(F.data.startswith('type_'))
 async def leagues_handler(call: CallbackQuery, state: FSMContext):
-    data = call.data.split('_')[-1]
+    data = call.data.split('_')[1]
     if data == 'forward':
         await state.set_state(ForwardState.text)
         await call.message.answer(text=f'Tayyor xabarni kiriting')
@@ -323,9 +321,11 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
             await call.message.edit_text("Settings", reply_markup=settings())
         except:
             await call.message.delete()
-            await call.message.edit_text("Settings", reply_markup=settings())
+            await call.message.answer("Settings", reply_markup=settings())
     if data == 'change':
-        pass
+        await call.message.delete()
+        await state.set_state(ZayafkaState.photo)
+        await call.message.answer(text="Tayyor malumotni jo'nating")
 
 
 @admin_router.message(ForwardState.text)

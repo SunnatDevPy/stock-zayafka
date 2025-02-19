@@ -125,16 +125,17 @@ async def send_message_button():
     return ikb.as_markup()
 
 
-def detail_message_channel(channel_id, url=None):
+def detail_message_channel(channel_id, buttons=None):
     ikb = InlineKeyboardBuilder()
-    if url != None:
-        ikb.row(InlineKeyboardButton(text="Link", url=url))
+    if buttons != None:
+        ikb.add(
+            *[InlineKeyboardButton(text=i[0].get('text'), url=i[0].get('url')) for i in buttons])
     ikb.add(
         *[
             InlineKeyboardButton(text="O'zgartirish", callback_data=f'type_change_{channel_id}'),
             InlineKeyboardButton(text="Ortga", callback_data=f'type_back'),
         ])
-    ikb.adjust(1, 2)
+    ikb.adjust(1, repeat=True)
     return ikb.as_markup()
 
 
