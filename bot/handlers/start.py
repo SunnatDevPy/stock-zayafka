@@ -30,13 +30,13 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
                 buttons = channel.buttons or []
 
                 if channel.photo:
-                    await bot.send_photo(chat_id=channel.chat_id, photo=channel.photo,
+                    await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo,
                                          caption=channel.text, reply_markup=links_zayafka(buttons))
                 elif channel.video:
-                    await bot.send_video(chat_id=channel.chat_id, video=channel.video,
+                    await bot.send_video(chat_id=chat_join.from_user.id, video=channel.video,
                                          caption=channel.text, reply_markup=links_zayafka(buttons))
                 else:
-                    await bot.send_message(chat_id=channel.chat_id, text=channel.text,
+                    await bot.send_message(chat_id=chat_join.from_user.id, text=channel.text,
                                            reply_markup=links_zayafka(buttons))
             else:
                 await bot.send_message(chat_id=chat_join.from_user.id, text='Xush kelibsiz')
