@@ -95,14 +95,19 @@ async def leagues_handler(message: Message, state: FSMContext):
         await message.answer("Rasim yuboring")
 
 
+"Введите кнопку в формате:\n"
+"`Название кнопки - ссылка`\n"
+
+
 @admin_router.message(SendTextChannel.text)
 async def leagues_handler(message: Message, state: FSMContext):
     await state.update_data(text=message.text)
     await state.set_state(SendTextChannel.link)
-    await message.answer("Link yuboring yoki <b>'✅ Tugatish'</b> tugmani bosing.",
-                         reply_markup=InlineKeyboardMarkup(
-                             inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
-                         ))
+    await message.answer(
+        "Knopka va linkni (<b> Knopka - link </b>) formatda yuboring yoki <b>'✅ Tugatish'</b> tugmani bosing.",
+        reply_markup=InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
+        ))
 
 
 @admin_router.message(SendTextChannel.link)
@@ -110,16 +115,23 @@ async def leagues_handler(message: Message, state: FSMContext):
     data = await state.get_data()
     links = data.get("links", [])
 
-    if Find(message.text):  # Проверяем правильность ссылки
-        links.append(message.text)
-        await state.update_data(links=links)
+    if " - " in message.text:
+        btn_text, btn_url = message.text.split(" - ", maxsplit=1)
 
-        await message.answer(f"✅ Link qo'shildi! -> {len(links)} .\nYana qo'shing yoki <b>'✅ Tugatish'</b>  tugmani bosing",
-                             reply_markup=InlineKeyboardMarkup(
-                                 inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
-                             ))
+        if Find(message.text):  # Проверяем правильность ссылки
+            links.append((btn_text.strip(), btn_url.strip()))
+            links.append(message.text)
+            await state.update_data(links=links)
+
+            await message.answer(
+                f"✅ Link qo'shildi! -> {btn_text} - {btn_url.strip()} .\nYana qo'shing yoki <b>'✅ Tugatish'</b>  tugmani bosing",
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
+                ))
+        else:
+            await message.answer("Link notog'ri formatda")
     else:
-        await message.answer("Link notog'ri formatda")
+        await message.answer("❌ Format notog'ri. Knopka va linkni (<b> Knopka - link </b>) formatda yuboring.")
 
 
 @admin_router.callback_query(lambda c: c.data == "finish")
@@ -130,7 +142,7 @@ async def finish_sending(callback: CallbackQuery, bot: Bot, state: FSMContext):
     links = data.get("links", [])
     channel_id = data.get("channel_id")
 
-    buttons = [[InlineKeyboardButton(text=f"link {i + 1}", url=link)] for i, link in enumerate(links)]
+    buttons = [[InlineKeyboardButton(text=btn_text, url=btn_url)] for btn_text, btn_url in links]
     markup = InlineKeyboardMarkup(inline_keyboard=buttons)
 
     try:
