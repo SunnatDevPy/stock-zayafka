@@ -1,166 +1,208 @@
-# from aiogram import Bot, F, Router, html
-# from aiogram.enums import ChatMemberStatus
-# from aiogram.fsm.context import FSMContext
-# from aiogram.types import CallbackQuery, Message
-#
-# from models import BotUser, Channels
-#
-# admin_router = Router()
-#
-#
-# async def mandatory_channel(user_id, bot: Bot):
-#     form_kb = []
-#     channels = await Channel.get_all()
-#     for channel_id in channels:
-#         member = await bot.get_chat_member(channel_id.id, user_id)
-#         if member.status == ChatMemberStatus.LEFT:
-#             form_kb.append(channel_id.id)
-#     if form_kb:
-#         return form_kb
-#     else:
-#         return
-#
-#
-# @admin_router.callback_query(F.data.startswith('settings_'))
-# async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
-#     data = call.data.split('_')[-1]
-#     await call.answer()
-#     if data == 'static':
-#         users = await User.get_all()
-#         await call.message.answer(html.bold(f'Admin\nUserlar soni: {len(users)}'), parse_mode='HTML')
-#     elif data == 'send':
-#         await call.message.answer(html.bold("Xabarni qaysi usulda jo'natmoqchisiz❓"), parse_mode='HTML',
-#                                   reply_markup=send_text())
-#     elif data == 'admins':
-#         await call.message.delete()
-#         await call.message.answer(html.bold("Adminlar ro'yxati"), parse_mode='HTML', reply_markup=await admins())
-#     elif data == 'get-id':
-#         await state.set_state(ForwardState.chat_id)
-#         await call.message.answer(text='Forward qilib message tashlang')
-#     elif data == 'subscribe':
-#         await call.message.edit_text('Kanallar ro\'yxati',
-#                                      reply_markup=await show_channels(bot=bot))
-#
-#
-# @admin_router.callback_query(F.data.startswith('admins_'))
-# async def delete_admins(call: CallbackQuery, state: FSMContext):
-#     data = call.data.split('_')
-#     await call.answer()
-#     if data[1] == 'add':
-#         await call.message.delete()
-#         await state.set_state(AddAdmin.user_id)
-#         await call.message.answer(html.bold("User idni kiriting"), parse_mode='HTML')
-#     if data[1] == 'delete':
-#         try:
-#             await User.update(id_=int(data[-1]), admin=False)
-#             await call.message.edit_text(html.bold("Adminlar ro'yxati"), parse_mode='HTML', reply_markup=await admins())
-#         except:
-#             await call.message.answer('Xatolik yuz berdi')
-#
-#
-# @admin_router.message(AddAdmin.user_id)
-# async def add_admin(call: Message, state: FSMContext):
-#     user = await User.get(int(call.text))
-#     print(user)
-#     if user:
-#         text = html.bold(f'''
-# #Admin qo'shildi
-# chat_id: <code>{user.id}</code>
-# Username: <code>@{user.username}</code>
-#             ''')
-#         await User.update(id_=user.id, admin=True)
-#         await call.answer(text, parse_mode='HTML')
-#         await call.answer(html.bold("Adminlar ro'yxati"), parse_mode='HTML', reply_markup=await admins())
-#     else:
-#         await call.answer(html.bold("Bunaqa id li user yo'q, bo'tga /start bergan bo'lish kerak"), parse_mode='HTML')
-#
-#
-# @admin_router.callback_query(F.data.startswith('send_'))
-# async def leagues_handler(call: CallbackQuery, state: FSMContext):
-#     data = call.data.split('_')[-1]
-#     await call.answer()
-#     await state.set_state(SendTextState.text)
-#     if data == 'text':
-#         await call.message.answer('Text xabarni kiriting')
-#     if data == 'video':
-#         await call.message.answer("Rasm yoki videoni kiriting")
-#
-#
-# @admin_router.message(SendTextState.text)
-# async def leagues_handler(msg: Message, state: FSMContext):
-#     if msg.photo:
-#         await state.set_state(SendTextState.video)
-#         await state.update_data(photo=msg.photo[-1].file_id)
-#         await msg.answer('Text xabarni kiriting')
-#     elif msg.video:
-#         await state.set_state(SendTextState.video)
-#         await state.update_data(video=msg.video.file_id)
-#         await msg.answer('Text xabarni kiriting')
-#     elif msg.text:
-#         await state.set_state(SendTextState.link)
-#         await state.update_data(text=msg.text)
-#         await msg.answer("Link jo'nating")
-#
-#
-# @admin_router.message(SendTextState.video)
-# async def leagues_handler(msg: Message, state: FSMContext):
-#     await state.update_data(text=msg.text)
-#     await state.set_state(SendTextState.link)
-#     await msg.answer("Link jo'nating")
-#
-#
-# @admin_router.message(SendTextState.link)
-# async def leagues_handler(msg: Message, state: FSMContext):
-#     await state.update_data(link=msg.text)
-#     data = await state.get_data()
-#     if len(data) == 2:
-#         await msg.answer(data['text'] + f'\n\n{data["link"]}', reply_markup=confirm_inl())
-#     else:
-#         if data.get('photo'):
-#             await msg.answer_photo(data['photo'], data['text'] + f'\n\n{data["link"]}', parse_mode='HTML',
-#                                    reply_markup=confirm_inl())
-#         else:
-#             await msg.answer_video(video=data['video'], caption=data['text'] + f'\n\n{data["link"]}', parse_mode='HTML',
-#                                    reply_markup=confirm_inl())
-#
-#
-# @admin_router.callback_query(F.data.endswith("_network"))
-# async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-#     data = call.data.split('_')
-#     res = await state.get_data()
-#     print(res)
-#     await call.answer()
-#     users: list[User] = await User.get_all()
-#     if data[0] == 'confirm':
-#         send = 0
-#         block = 0
-#         if len(res) == 2:
-#             for i in users:
-#                 try:
-#                     await bot.send_message(i.id, res['text'], parse_mode='HTML', reply_markup=link(res['link']))
-#                     send += 1
-#                 except:
-#                     block += 1
-#         else:
-#             if res.get('photo'):
-#                 for i in users:
-#                     try:
-#                         await bot.send_photo(chat_id=i.id, photo=res['photo'], caption=res['text'], parse_mode='HTML',
-#                                              reply_markup=link(res['link']))
-#                         send += 1
-#                     except:
-#                         block += 1
-#             elif res.get('video'):
-#                 for i in users:
-#                     try:
-#                         await bot.send_video(chat_id=i.id, video=res['video'], caption=res['text'], parse_mode='HTML',
-#                                              reply_markup=link(res['link']))
-#                         send += 1
-#                     except:
-#                         block += 1
-#         await call.message.answer(f'Yuborildi: {send}\nBlockda: {block}')
-#
-#     elif data[0] == 'cancel':
-#         await call.message.delete()
-#         await call.message.answer("Protsess to'xtatildi")
-#     await state.clear()
+from aiogram import Bot, F, Router, html
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import CallbackQuery, Message
+
+from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add
+from models import BotUser, Channels, TextInSend
+
+admin_router = Router()
+
+import re
+
+
+def Find(string):
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    url = re.findall(regex, string)
+    return [x[0] for x in url]
+
+
+class SendTextState(StatesGroup):
+    text = State()
+    video = State()
+    link = State()
+    confirm = State()
+
+
+class AddTextSend(StatesGroup):
+    text = State()
+    link = State()
+
+
+class ChangeTextSend(StatesGroup):
+    text = State()
+
+
+@admin_router.callback_query(F.data.startswith('settings_'))
+async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+    data = call.data.split('_')[-1]
+    await call.answer()
+    if data == 'static':
+        users = await BotUser.count()
+        channel = await Channels.count()
+        await call.message.answer(
+            html.bold(f'Admin\nUserlar soni: <b>{users},\nKanallar soni: {channel}</b>'), parse_mode='HTML')
+    elif data == 'send':
+        await call.message.answer(html.bold("Xabarni qaysi usulda jo'natmoqchisiz❓"), parse_mode='HTML',
+                                  reply_markup=send_text())
+    elif data == 'text':
+        text: TextInSend = await TextInSend.get(1)
+        if text:
+            await call.message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
+        else:
+            await call.message.answer(text="Text qo'shlmagan", reply_markup=text_add(status=False))
+    elif data == 'subscribe':
+        channels_ = await Channels.all()
+        if channels_:
+            await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
+        else:
+            await call.message.answer(text="Kanallarga bot qo'shilmagan", reply_markup=await channels(channels_))
+    elif data == 'back':
+        await call.message.answer(text='Bosh menu', reply_markup=menu(admin=True))
+
+
+@admin_router.callback_query(F.data.startswith('send_'))
+async def leagues_handler(call: CallbackQuery, state: FSMContext):
+    data = call.data.split('_')[-1]
+    await call.answer()
+    await state.set_state(SendTextState.text)
+    if data == 'text':
+        await call.message.answer('Text xabarni kiriting')
+    if data == 'video':
+        await call.message.answer("Rasm yoki videoni kiriting")
+    if data == 'back':
+        await state.clear()
+        await call.message.edit_text("Settings", reply_markup=settings())
+
+
+@admin_router.message(SendTextState.text)
+async def leagues_handler(msg: Message, state: FSMContext):
+    if msg.photo:
+        await state.set_state(SendTextState.video)
+        await state.update_data(photo=msg.photo[-1].file_id)
+        await msg.answer('Text xabarni kiriting')
+    elif msg.video:
+        await state.set_state(SendTextState.video)
+        await state.update_data(video=msg.video.file_id)
+        await msg.answer('Text xabarni kiriting')
+    elif msg.text:
+        await state.set_state(SendTextState.link)
+        await state.update_data(text=msg.text)
+        await msg.answer("Link jo'nating")
+
+
+@admin_router.message(SendTextState.video)
+async def leagues_handler(msg: Message, state: FSMContext):
+    await state.update_data(text=msg.text)
+    await state.set_state(SendTextState.link)
+    await msg.answer("Link jo'nating")
+
+
+@admin_router.message(SendTextState.link)
+async def leagues_handler(msg: Message, state: FSMContext):
+    await state.update_data(link=msg.text)
+    data = await state.get_data()
+    if len(data) == 2:
+        await msg.answer(data['text'] + f'\n\n{data["link"]}', reply_markup=confirm_inl())
+    else:
+        if data.get('photo'):
+            await msg.answer_photo(data['photo'], data['text'] + f'\n\n{data["link"]}', parse_mode='HTML',
+                                   reply_markup=confirm_inl())
+        else:
+            await msg.answer_video(video=data['video'], caption=data['text'] + f'\n\n{data["link"]}', parse_mode='HTML',
+                                   reply_markup=confirm_inl())
+
+
+@admin_router.callback_query(F.data.endswith("_network"))
+async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    data = call.data.split('_')
+    res = await state.get_data()
+    print(res)
+    await call.answer()
+    users: list[BotUser] = await BotUser.all()
+    if data[0] == 'confirm':
+        send = 0
+        block = 0
+        if len(res) == 2:
+            for i in users:
+                try:
+                    await bot.send_message(i.id, res['text'], parse_mode='HTML', reply_markup=link(res['link']))
+                    send += 1
+                except:
+                    block += 1
+        else:
+            if res.get('photo'):
+                for i in users:
+                    try:
+                        await bot.send_photo(chat_id=i.id, photo=res['photo'], caption=res['text'], parse_mode='HTML',
+                                             reply_markup=link(res['link']))
+                        send += 1
+                    except:
+                        block += 1
+            elif res.get('video'):
+                for i in users:
+                    try:
+                        await bot.send_video(chat_id=i.id, video=res['video'], caption=res['text'], parse_mode='HTML',
+                                             reply_markup=link(res['link']))
+                        send += 1
+                    except:
+                        block += 1
+        await call.message.answer(f'Yuborildi: {send}\nBlockda: {block}')
+
+    elif data[0] == 'cancel':
+        await call.message.delete()
+        await call.message.answer("Protsess to'xtatildi")
+    await state.clear()
+
+
+@admin_router.callback_query(F.data.endswith("text_"))
+async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    data = call.data.split('_')
+    if data == 'add':
+        await state.set_state(AddTextSend.text)
+        await call.message.answer("Yangi text kiriting")
+    if data == "change":
+        await state.set_state(ChangeTextSend.text)
+        await call.message.answer("Yangi text kiriting")
+    if data == 'back':
+        await call.message.edit_text("Settings", reply_markup=settings())
+
+
+@admin_router.callback_query(AddTextSend.text)
+async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await state.update_data(text=call.message.text)
+    await state.set_state(AddTextSend.link)
+    await call.message.answer("Link kiriting!")
+
+
+@admin_router.callback_query(ChangeTextSend.text)
+async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    await state.update_data(text=call.message.text)
+    await TextInSend.update(1, text=call.message.text)
+    text: TextInSend = await TextInSend.get(1)
+    await call.message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
+    await state.set_state(AddTextSend.link)
+    await call.message.answer("Link kiriting!")
+
+
+@admin_router.callback_query(AddTextSend.link)
+async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    if Find(call.message.text):
+        data = await state.get_data()
+        await state.update_data(link=call.message.text)
+        await TextInSend.create(text=data.get('text'), link=call.message.text)
+        await call.message.answer(text=f"{data.get('text')}\n\n{call.message.text}", reply_markup=text_add())
+    else:
+        await call.message.answer("Link notog'ri formatda! Qayta kiriting!")
+
+
+@admin_router.message(F.new_chat_member)
+async def on_bot_added_to_group(message: Message, bot: Bot):
+    if message.chat.type == "channel":
+        chat_member = await bot.get_chat_member(message.chat.id, bot.id)
+        if chat_member.status in ["administrator", "creator"]:
+            await Channels.create(chat_id=message.chat.id, name=message.chat.title)
+            await bot.send_message(
+                message.chat.id,
+                f"✅ Bot kanalga qo'shildi: {message.chat.title} (Kanal ID: {message.chat.id})"
+            )

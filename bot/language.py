@@ -24,7 +24,7 @@ async def language_handler(call: CallbackQuery, state: FSMContext):
     if not user:
         await call.message.answer(f'{salom} {call.from_user.first_name}')
     else:
-        if call.from_user.id in [5649321700, ]:
+        if call.from_user.id in [5649321700, 1353080275]:
             await call.message.answer(f'{salom} Admin {call.from_user.first_name}', reply_markup=menu(admin=True))
 
         else:

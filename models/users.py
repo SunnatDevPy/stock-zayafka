@@ -16,7 +16,9 @@ class BotUser(BaseModel):
 
 class Channels(BaseModel):
     chat_id: Mapped[int] = mapped_column(BigInteger)
+    name: Mapped[str]
 
 
 class TextInSend(BaseModel):
     text: Mapped[str] = mapped_column(Text, nullable=True)
+    link: Mapped[str]
