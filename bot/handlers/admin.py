@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message, ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add
+from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add, link_from_channel
 from models import BotUser, Channels, TextInSend
 
 admin_router = Router()
@@ -82,7 +82,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.delete()
         await state.update_data(channel_id=data[-1])
         await state.set_state(SendTextChannel.photo)
-        await call.message.answer(text=f'Kanalga {data[-1]} xabar yuborish uchun rasim kiriting')
+        await call.message.answer(text=f'Kanalga {data[-1]} xabar yuborish uchun 🌆Rasim kiriting')
 
 
 @admin_router.message(SendTextChannel.photo)
@@ -105,6 +105,7 @@ async def leagues_handler(message: Message, state: FSMContext):
     await state.set_state(SendTextChannel.link)
     await message.answer(
         "Knopka va linkni (<b> Knopka - link </b>) formatda yuboring yoki <b>'✅ Tugatish'</b> tugmani bosing.",
+        parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
         ))
@@ -118,13 +119,13 @@ async def leagues_handler(message: Message, state: FSMContext):
     if " - " in message.text:
         btn_text, btn_url = message.text.split(" - ", maxsplit=1)
 
-        if Find(message.text):  # Проверяем правильность ссылки
+        if Find(message.text):
             links.append((btn_text.strip(), btn_url.strip()))
-            links.append(message.text)
             await state.update_data(links=links)
 
             await message.answer(
                 f"✅ Link qo'shildi! -> {btn_text} - {btn_url.strip()} .\nYana qo'shing yoki <b>'✅ Tugatish'</b>  tugmani bosing",
+                parse_mode="HTML",
                 reply_markup=InlineKeyboardMarkup(
                     inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
                 ))
@@ -142,12 +143,10 @@ async def finish_sending(callback: CallbackQuery, bot: Bot, state: FSMContext):
     links = data.get("links", [])
     channel_id = data.get("channel_id")
 
-    buttons = [[InlineKeyboardButton(text=btn_text, url=btn_url)] for btn_text, btn_url in links]
-    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
-
     try:
-        await bot.send_photo(channel_id, photo=photo, caption=text, reply_markup=markup)
+        await bot.send_photo(channel_id, photo=photo, caption=text, reply_markup=link_from_channel(links))
         await callback.message.answer("📢 Kanalga xabar yuborildi!")
+        await callback.message.answer("Settings", reply_markup=settings())
     except:
         await callback.message.answer("❌ Yuborishda xatolik, tekshirib ko'ring admin qilganmisiz kanalga.")
 

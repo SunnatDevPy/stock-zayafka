@@ -40,6 +40,14 @@ def link(url):
     return ikb.as_markup()
 
 
+def link_from_channel(links):
+    ikb = InlineKeyboardBuilder()
+    for btn in links:
+        ikb.add(InlineKeyboardButton(text=btn[0], url=btn[-1]))
+    ikb.adjust(1)
+    return ikb.as_markup()
+
+
 def text_add(status=False):
     ikb = InlineKeyboardBuilder()
     if status:
