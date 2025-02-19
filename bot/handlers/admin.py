@@ -153,8 +153,7 @@ async def finish_sending(callback: CallbackQuery, bot: Bot, state: FSMContext):
     await state.clear()
 
 
-#
-#
+
 # @admin_router.message(SendTextChannel.photo)
 # async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
 #     if message.photo:
