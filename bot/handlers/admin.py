@@ -229,7 +229,6 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         if channel.text:
             await call.message.answer_photo(photo=channel.photo, caption=channel.text, reply_markup=link(channel.link))
         else:
-            await call.message.delete()
             await state.set_state(ZayafkaState.photo)
             await call.message.answer(text="Rasm jo'nating")
 
