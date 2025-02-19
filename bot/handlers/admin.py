@@ -82,7 +82,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.answer(text=f'Kanalga xabar yuborish uchun matn kiriting')
 
 
-@admin_router.message(SendTextSend)
+@admin_router.message(SendTextSend.text)
 async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     try:
