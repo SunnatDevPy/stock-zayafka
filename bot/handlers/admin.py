@@ -64,9 +64,9 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
-            await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
+            await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
         else:
-            await call.message.answer(text="Kanallarga bot qo'shilmagan", reply_markup=await channels(channels_))
+            await call.message.edit_text(text="Kanallarga bot qo'shilmagan", reply_markup=await channels(channels_))
     elif data == 'back':
         await call.message.answer(text='Bosh menu', reply_markup=menu(admin=True))
 
@@ -77,21 +77,22 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     if data[1] == 'back':
         await call.message.edit_text("Settings", reply_markup=settings())
     if data[1] == 'send':
+        await call.message.delete()
         await state.update_data(channel_id=data[-1])
         await state.set_state(SendTextSend.text)
-        await call.message.answer(text=f'Kanalga xabar yuborish uchun matn kiriting')
+        await call.message.answer(text=f'Kanalga {data[-1]} xabar yuborish uchun matn kiriting')
 
 
 @admin_router.message(SendTextSend.text)
 async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
-    try:
-        await bot.send_message(data.get('channel_id'), text=message.text)
-        await message.edit_text("Kanalga xabar yuborildi")
-        await message.edit_text("Settings", reply_markup=settings())
-    except:
-        await message.edit_text("Kanalga xabar yuborishda xatolik")
-        await message.edit_text("Settings", reply_markup=settings())
+    # try:
+    await bot.send_message(data.get('channel_id'), text=message.text)
+    await message.answer("Kanalga xabar yuborildi")
+    await message.answer("Settings", reply_markup=settings())
+    # except:
+    #     await message.answer("Kanalga xabar yuborishda xatolik")
+    #     await message.answer("Settings", reply_markup=settings())
     await state.clear()
 
 
