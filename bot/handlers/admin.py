@@ -34,6 +34,10 @@ class ChangeTextSend(StatesGroup):
     text = State()
 
 
+class SendTextSend(StatesGroup):
+    text = State()
+
+
 @admin_router.callback_query(F.data.startswith('settings_stock'))
 async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     await call.message.edit_text("Settings", reply_markup=settings())
@@ -69,7 +73,26 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
 
 @admin_router.callback_query(F.data.startswith('channels_'))
 async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
-    await call.message.edit_text("Settings", reply_markup=settings())
+    data = call.data.split('_')
+    if data[1] == 'back':
+        await call.message.edit_text("Settings", reply_markup=settings())
+    if data[1] == 'send':
+        await state.update_data(channel_id=data[-1])
+        await state.set_state(SendTextSend.text)
+        await call.message.answer(text=f'Kanalga xabar yuborish uchun matn kiriting')
+
+
+@admin_router.message(SendTextSend)
+async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    try:
+        await bot.send_message(data.get('channel_id'), text=message.text)
+        await message.edit_text("Kanalga xabar yuborildi")
+        await message.edit_text("Settings", reply_markup=settings())
+    except:
+        await message.edit_text("Kanalga xabar yuborishda xatolik")
+        await message.edit_text("Settings", reply_markup=settings())
+    await state.clear()
 
 
 @admin_router.callback_query(F.data.startswith('send_'))
@@ -195,6 +218,7 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     # await state.set_state(AddTextSend.link)
     # await message.answer("Link kiriting!")
 
+
 # @admin_router.message(ChangeTextSend.link)
 # async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
 #     await state.update_data(text=message.text)
@@ -237,3 +261,7 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
                     admin_2,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
                 )
+
+# @admin_router.callback_query(F.data.startswith('settings_stock'))
+# async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+#     await call.message.edit_text("Settings", reply_markup=settings())

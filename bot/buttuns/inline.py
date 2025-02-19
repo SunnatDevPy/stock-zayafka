@@ -79,7 +79,7 @@ async def channels(channels):
     ikb = InlineKeyboardBuilder()
     for i in channels:
         ikb.add(*[
-            InlineKeyboardButton(text=i.name, callback_data=f'channels_{i.id}')
+            InlineKeyboardButton(text=i.name, callback_data=f'channels_send_{i.id}')
         ])
     ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/stock_security_bot?startchannel=true"))
     ikb.row(InlineKeyboardButton(text="⬅️Ortga️", callback_data="channels_back"))
