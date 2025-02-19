@@ -275,7 +275,7 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     else:
         await bot.send_message(chat_id=channel.chat_id, text=channel.text,
                                reply_markup=links_zayafka(buttons))
-    await message.edit_text("Settings", reply_markup=settings())
+    await message.answer("Settings", reply_markup=settings())
 
     await state.clear()
 
