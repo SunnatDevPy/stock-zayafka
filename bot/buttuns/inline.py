@@ -136,3 +136,11 @@ def detail_message_channel(channel_id, url=None):
         ])
     ikb.adjust(1, 2)
     return ikb.as_markup()
+
+
+def links_zayafka(buttons):
+    ikb = InlineKeyboardBuilder()
+    ikb.add(
+        *[InlineKeyboardButton(text=btn["text"], url=btn["url"]) for btn in buttons])
+    ikb.adjust(1, 2)
+    return ikb.as_markup()
