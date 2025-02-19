@@ -5,8 +5,8 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message, ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add, link_from_channel, \
-    detail_channel, send_message_button
-from models import BotUser, Channels, TextInSend
+    detail_channel, send_message_button, detail_message_channel
+from models import BotUser, Channels
 
 admin_router = Router()
 
@@ -58,12 +58,6 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     elif data == 'send':
         await call.message.answer(html.bold("Xabarni qaysi usulda jo'natmoqchisiz❓"), parse_mode='HTML',
                                   reply_markup=send_text())
-    elif data == 'text':
-        text: TextInSend = await TextInSend.get(1)
-        if text:
-            await call.message.edit_text(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
-        else:
-            await call.message.edit_text(text="Text qo'shilmagan", reply_markup=text_add(status=True))
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
@@ -168,55 +162,6 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     await state.clear()
 
 
-@admin_router.callback_query(F.data.startswith("text_"))
-async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    data = call.data.split('_')[-1]
-    if data == 'add':
-        await state.set_state(AddTextSend.text)
-        await call.message.answer("Yangi text kiriting")
-    if data == "change":
-        await state.set_state(ChangeTextSend.text)
-        await call.message.answer("Yangi text kiriting")
-    if data == 'back':
-        await call.message.edit_text("Settings", reply_markup=settings())
-
-
-@admin_router.message(AddTextSend.text)
-async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
-    await state.update_data(text=message.text)
-    await state.set_state(AddTextSend.link)
-    await message.answer("Link kiriting!")
-
-
-@admin_router.message(ChangeTextSend.text)
-async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
-    await state.update_data(text=message.text)
-    await TextInSend.update(1, text=message.text)
-    text: TextInSend = await TextInSend.get(1)
-    await message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
-    # await state.set_state(AddTextSend.link)
-    # await message.answer("Link kiriting!")
-
-
-# @admin_router.message(ChangeTextSend.link)
-# async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
-#     await state.update_data(text=message.text)
-#     await TextInSend.update(1, text=message.text)
-#     text: TextInSend = await TextInSend.get(1)
-#     await state.set_state(AddTextSend.link)
-#     await message.answer("Link kiriting!")
-
-@admin_router.message(AddTextSend.link)
-async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
-    if Find(message.text):
-        data = await state.get_data()
-        await state.update_data(link=message.text)
-        await TextInSend.create(text=data.get('text'), link=message.text)
-        await message.answer(text=f"{data.get('text')}\n\n{message.text}", reply_markup=text_add())
-    else:
-        await message.answer("Link notog'ri formatda! Qayta kiriting!")
-
-
 admin_1 = 5649321700
 admin_2 = 1353080275
 
@@ -245,6 +190,10 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
 # ========== Kanallar bilan ishlash
 # ==========
 # ==========
+class ZayafkaState(StatesGroup):
+    photo = State()
+    text = State()
+    link = State()
 
 
 @admin_router.callback_query(F.data.startswith('channels_'))
@@ -271,6 +220,47 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
     if data[1] == 'send':
         await call.message.edit_text(text=f'Kanalga {data[-1]} xabar yuborish turini tanlang',
                                      reply_markup=await send_message_button())
+    if data[1] == 'zayafka':
+        channel: Channels = await Channels.get_chat(int(data[-1]))
+        await state.update_data(channel_id=channel.chat_id)
+        await call.message.delete()
+        if channel.text:
+            await call.message.answer_photo(photo=channel.photo, caption=channel.text, reply_markup=link(channel.link))
+        else:
+            await call.message.delete()
+            await state.set_state(ZayafkaState.photo)
+            await call.message.answer(text="Rasm jo'nating")
+
+
+@admin_router.message(ZayafkaState.photo)
+async def leagues_handler(message: Message, state: FSMContext):
+    if message.photo:
+        await state.set_state(ZayafkaState.text)
+        await state.update_data(photo=message.photo[-1].file_id)
+        await message.answer(text="Text jo'nating")
+    else:
+        await message.answer(text="Rasm jo'nating")
+
+
+@admin_router.message(ZayafkaState.text)
+async def leagues_handler(message: Message, state: FSMContext):
+    await state.set_state(ZayafkaState.link)
+    await state.update_data(text=message.text)
+    await message.answer(text="Link yuboring")
+
+
+@admin_router.message(ZayafkaState.link)
+async def leagues_handler(message: Message, state: FSMContext):
+    data = await state.get_data()
+    channel: Channels = await Channels.get_chat(int(data.get('channel_id')))
+    if Find(message.text):
+        await Channels.update(channel.id, link=data.get('link'), photo=data.get('photo'), text=data.get('text'))
+        await state.clear()
+        await message.answer_photo(photo=data.get('photo'), caption=data.get('text'),
+                                   reply_markup=await detail_message_channel(data.get('channel_id'),
+                                                                             url=data.get('link')))
+    else:
+        await message.answer(text="Link notog'ri formatda")
 
 
 class ForwardState(StatesGroup):

@@ -2,8 +2,8 @@ import asyncio
 import logging
 import sys
 
-from aiogram import Dispatcher, Bot, F
-from aiogram.types import BotCommand, ChatJoinRequest
+from aiogram import Dispatcher, Bot
+from aiogram.types import BotCommand, ChatJoinRequest, Update
 
 from bot.buttuns.inline import link
 from bot.handlers.admin import admin_router
@@ -25,15 +25,26 @@ async def on_shutdown(bot: Bot):
     await bot.delete_my_commands()
 
 
-async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
-    channel = await Channels.get(chat_join.chat.id)
-    text: TextInSend = await TextInSend.get(1)
-    if channel.status:
-        if text:
-            await bot.send_message(chat_id=chat_join.from_user.id, text=text.text, reply_markup=link(text.link))
-        else:
-            await bot.send_message(chat_id=chat_join.from_user.id, text="xush kelibsiz")
-        await chat_join.approve()
+# async def handle_chat_join_request(update: Update, bot: Bot):
+#     """Обработчик входящих заявок в канал"""
+#     if not update.chat_join_request:
+#         return  # Если это не заявка на вступление, выходим
+#
+#     chat_join: ChatJoinRequest = update.chat_join_request
+#     channel = await Channels.get(chat_join.chat.id)  # Получаем канал из БД
+#     text: TextInSend = await TextInSend.get(1)  # Получаем текст из БД
+#
+#     if channel and channel.status:
+#         if text:
+#             await bot.send_message(
+#                 chat_id=chat_join.from_user.id,
+#                 text=text.text,
+#                 reply_markup=link(text.link)
+#             )
+#         else:
+#             await bot.send_message(chat_id=chat_join.from_user.id, text="Xush kelibsiz!")
+#
+#         await chat_join.approve()
 
 
 async def main():
@@ -41,7 +52,7 @@ async def main():
     dp.include_routers(start_router, language_router, admin_router)
     dp.startup.register(on_start)
     dp.shutdown.register(on_shutdown)
-    dp.chat_join_request(zayafka, F.chat)
+    # dp.update.middleware(handle_chat_join_request)
 
     await dp.start_polling(bot)
 
