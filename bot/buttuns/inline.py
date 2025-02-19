@@ -27,8 +27,8 @@ def settings():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="Userlar soni", callback_data='settings_static'),
               InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
-              InlineKeyboardButton(text="Obuna text", callback_data='settings_text'),
-              InlineKeyboardButton(text="Kanalga qo'shish", callback_data='settings_subscribe'),
+              InlineKeyboardButton(text="➕Obuna text➕", callback_data='settings_text'),
+              InlineKeyboardButton(text="➕Kanalga qo'shish➕", callback_data='settings_subscribe'),
               InlineKeyboardButton(text="⬅️Ortga", callback_data='settings_back')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
@@ -43,9 +43,10 @@ def link(url):
 def text_add(status=False):
     ikb = InlineKeyboardBuilder()
     if status:
-        ikb.row(InlineKeyboardButton(text="Qo'shish", callback_data="text_add"))
+        ikb.row(InlineKeyboardButton(text="➕Qo'shish➕", callback_data="text_add"))
     else:
-        ikb.row(InlineKeyboardButton(text="O'zgartirish", callback_data="text_change"))
+        ikb.row(InlineKeyboardButton(text="🔃O'zgartirish🔃", callback_data="text_change"))
+    ikb.row(InlineKeyboardButton(text="👈Ortga👈", callback_data="text_back"))
     return ikb.as_markup()
 
 

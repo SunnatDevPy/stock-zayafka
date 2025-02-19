@@ -54,9 +54,9 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     elif data == 'text':
         text: TextInSend = await TextInSend.get(1)
         if text:
-            await call.message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
+            await call.message.edit_text(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
         else:
-            await call.message.answer(text="Text qo'shlmagan", reply_markup=text_add(status=True))
+            await call.message.edit_text(text="Text qo'shilmagan", reply_markup=text_add(status=True))
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
@@ -65,6 +65,11 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
             await call.message.answer(text="Kanallarga bot qo'shilmagan", reply_markup=await channels(channels_))
     elif data == 'back':
         await call.message.answer(text='Bosh menu', reply_markup=menu(admin=True))
+
+
+@admin_router.callback_query(F.data.startswith('channels_'))
+async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.message.edit_text("Settings", reply_markup=settings())
 
 
 @admin_router.callback_query(F.data.startswith('send_'))
@@ -163,7 +168,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
 
 @admin_router.callback_query(F.data.startswith("text_"))
 async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    data = call.data.split('_')
+    data = call.data.split('_')[-1]
     if data == 'add':
         await state.set_state(AddTextSend.text)
         await call.message.answer("Yangi text kiriting")
@@ -174,32 +179,39 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         await call.message.edit_text("Settings", reply_markup=settings())
 
 
-@admin_router.callback_query(AddTextSend.text)
-async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await state.update_data(text=call.message.text)
+@admin_router.message(AddTextSend.text)
+async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
+    await state.update_data(text=message.text)
     await state.set_state(AddTextSend.link)
-    await call.message.answer("Link kiriting!")
+    await message.answer("Link kiriting!")
 
 
-@admin_router.callback_query(ChangeTextSend.text)
-async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    await state.update_data(text=call.message.text)
-    await TextInSend.update(1, text=call.message.text)
+@admin_router.message(ChangeTextSend.text)
+async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
+    await state.update_data(text=message.text)
+    await TextInSend.update(1, text=message.text)
     text: TextInSend = await TextInSend.get(1)
-    await call.message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
-    await state.set_state(AddTextSend.link)
-    await call.message.answer("Link kiriting!")
+    await message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
+    # await state.set_state(AddTextSend.link)
+    # await message.answer("Link kiriting!")
 
+# @admin_router.message(ChangeTextSend.link)
+# async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
+#     await state.update_data(text=message.text)
+#     await TextInSend.update(1, text=message.text)
+#     text: TextInSend = await TextInSend.get(1)
+#     await state.set_state(AddTextSend.link)
+#     await message.answer("Link kiriting!")
 
-@admin_router.callback_query(AddTextSend.link)
-async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
-    if Find(call.message.text):
+@admin_router.message(AddTextSend.link)
+async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
+    if Find(message.text):
         data = await state.get_data()
-        await state.update_data(link=call.message.text)
-        await TextInSend.create(text=data.get('text'), link=call.message.text)
-        await call.message.answer(text=f"{data.get('text')}\n\n{call.message.text}", reply_markup=text_add())
+        await state.update_data(link=message.text)
+        await TextInSend.create(text=data.get('text'), link=message.text)
+        await message.answer(text=f"{data.get('text')}\n\n{message.text}", reply_markup=text_add())
     else:
-        await call.message.answer("Link notog'ri formatda! Qayta kiriting!")
+        await message.answer("Link notog'ri formatda! Qayta kiriting!")
 
 
 admin_1 = 5649321700
