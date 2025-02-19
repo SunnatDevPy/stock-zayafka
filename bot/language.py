@@ -22,6 +22,10 @@ async def language_handler(call: CallbackQuery, state: FSMContext):
     await call.answer(til, show_alert=True)
     user = await BotUser.get(call.from_user.id)
     if not user:
+        from_user = call.from_user
+        await BotUser.create(id=from_user.id, first_name=from_user.first_name,
+                             last_name=from_user.last_name,
+                             username=from_user.username)
         if call.from_user.id in [5649321700, 1353080275]:
             await call.message.answer(f'{salom} Admin {call.from_user.first_name}', reply_markup=menu(admin=True))
         else:

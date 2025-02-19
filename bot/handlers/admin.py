@@ -1,7 +1,8 @@
 from aiogram import Bot, F, Router, html
+from aiogram.enums import ChatMemberStatus
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, Chat, ChatMemberUpdated
 
 from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add
 from models import BotUser, Channels, TextInSend
@@ -55,7 +56,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         if text:
             await call.message.answer(text=f"{text.text}\n\n{text.link}", reply_markup=text_add())
         else:
-            await call.message.answer(text="Text qo'shlmagan", reply_markup=text_add(status=False))
+            await call.message.answer(text="Text qo'shlmagan", reply_markup=text_add(status=True))
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
@@ -160,7 +161,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     await state.clear()
 
 
-@admin_router.callback_query(F.data.endswith("text_"))
+@admin_router.callback_query(F.data.startswith("text_"))
 async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     data = call.data.split('_')
     if data == 'add':
@@ -201,13 +202,26 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         await call.message.answer("Link notog'ri formatda! Qayta kiriting!")
 
 
-@admin_router.message(F.new_chat_member)
-async def on_bot_added_to_group(message: Message, bot: Bot):
-    if message.chat.type == "channel":
-        chat_member = await bot.get_chat_member(message.chat.id, bot.id)
-        if chat_member.status in ["administrator", "creator"]:
-            await Channels.create(chat_id=message.chat.id, name=message.chat.title)
-            await bot.send_message(
-                message.chat.id,
-                f"✅ Bot kanalga qo'shildi: {message.chat.title} (Kanal ID: {message.chat.id})"
-            )
+admin_1 = 5649321700
+admin_2 = 1353080275
+
+
+@admin_router.my_chat_member()
+async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
+    if update.chat.type == "channel":
+        new_status = update.new_chat_member.status
+        old_status = update.old_chat_member.status
+
+        if new_status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR] and old_status != new_status:
+            channel = await Channels.get(update.chat.id)
+            if channel is None:
+                await Channels.create(chat_id=update.chat.id, name=update.chat.title)
+
+                await bot.send_message(
+                    admin_1,
+                    f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
+                )
+                await bot.send_message(
+                    admin_2,
+                    f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
+                )

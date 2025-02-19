@@ -40,13 +40,12 @@ def link(url):
     return ikb.as_markup()
 
 
-def text_add(status=True):
+def text_add(status=False):
     ikb = InlineKeyboardBuilder()
     if status:
         ikb.row(InlineKeyboardButton(text="Qo'shish", callback_data="text_add"))
     else:
         ikb.row(InlineKeyboardButton(text="O'zgartirish", callback_data="text_change"))
-    ikb.row(InlineKeyboardButton(text="O'zgartirish", callback_data="text_back"))
     return ikb.as_markup()
 
 
@@ -81,7 +80,7 @@ async def channels(channels):
         ikb.add(*[
             InlineKeyboardButton(text=i.name, callback_data=f'channels_{i.id}')
         ])
-    ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/asamax_prizbot?startchannel=true"))
+    ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/stock_security_bot?startchannel=true"))
     ikb.row(InlineKeyboardButton(text="⬅️Ortga️", callback_data="channels_back"))
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()
