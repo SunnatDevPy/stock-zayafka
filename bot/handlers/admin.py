@@ -2,7 +2,7 @@ from aiogram import Bot, F, Router, html
 from aiogram.enums import ChatMemberStatus
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import CallbackQuery, Message, ChatMemberUpdated
+from aiogram.types import CallbackQuery, Message, ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton
 
 from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add
 from models import BotUser, Channels, TextInSend
@@ -34,8 +34,10 @@ class ChangeTextSend(StatesGroup):
     text = State()
 
 
-class SendTextSend(StatesGroup):
+class SendTextChannel(StatesGroup):
+    photo = State()
     text = State()
+    link = State()
 
 
 @admin_router.callback_query(F.data.startswith('settings_stock'))
@@ -79,21 +81,100 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     if data[1] == 'send':
         await call.message.delete()
         await state.update_data(channel_id=data[-1])
-        await state.set_state(SendTextSend.text)
-        await call.message.answer(text=f'Kanalga {data[-1]} xabar yuborish uchun matn kiriting')
+        await state.set_state(SendTextChannel.photo)
+        await call.message.answer(text=f'Kanalga {data[-1]} xabar yuborish uchun rasim kiriting')
 
 
-@admin_router.message(SendTextSend.text)
-async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
+@admin_router.message(SendTextChannel.photo)
+async def leagues_handler(message: Message, state: FSMContext):
+    if message.photo:
+        await state.update_data(photo=message.photo[-1].file_id, links=[])  # Добавляем список ссылок
+        await state.set_state(SendTextChannel.text)
+        await message.answer("Tekst kiriting")
+    else:
+        await message.answer("Rasim yuboring")
+
+
+@admin_router.message(SendTextChannel.text)
+async def leagues_handler(message: Message, state: FSMContext):
+    await state.update_data(text=message.text)
+    await state.set_state(SendTextChannel.link)
+    await message.answer("Link yuboring yoki <b>'✅ Tugatish'</b> tugmani bosing.",
+                         reply_markup=InlineKeyboardMarkup(
+                             inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
+                         ))
+
+
+@admin_router.message(SendTextChannel.link)
+async def leagues_handler(message: Message, state: FSMContext):
     data = await state.get_data()
-    # try:
-    await bot.send_message(data.get('channel_id'), text=message.text)
-    await message.answer("Kanalga xabar yuborildi")
-    await message.answer("Settings", reply_markup=settings())
-    # except:
-    #     await message.answer("Kanalga xabar yuborishda xatolik")
-    #     await message.answer("Settings", reply_markup=settings())
+    links = data.get("links", [])
+
+    if Find(message.text):  # Проверяем правильность ссылки
+        links.append(message.text)
+        await state.update_data(links=links)
+
+        await message.answer(f"✅ Link qo'shildi! -> {len(links)} .\nYana qo'shing yoki <b>'✅ Tugatish'</b>  tugmani bosing",
+                             reply_markup=InlineKeyboardMarkup(
+                                 inline_keyboard=[[InlineKeyboardButton(text="✅ Tugatish", callback_data="finish")]]
+                             ))
+    else:
+        await message.answer("Link notog'ri formatda")
+
+
+@admin_router.callback_query(lambda c: c.data == "finish")
+async def finish_sending(callback: CallbackQuery, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    photo = data.get("photo")
+    text = data.get("text")
+    links = data.get("links", [])
+    channel_id = data.get("channel_id")
+
+    buttons = [[InlineKeyboardButton(text=f"link {i + 1}", url=link)] for i, link in enumerate(links)]
+    markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    try:
+        await bot.send_photo(channel_id, photo=photo, caption=text, reply_markup=markup)
+        await callback.message.answer("📢 Kanalga xabar yuborildi!")
+    except:
+        await callback.message.answer("❌ Yuborishda xatolik, tekshirib ko'ring admin qilganmisiz kanalga.")
+
     await state.clear()
+
+
+#
+#
+# @admin_router.message(SendTextChannel.photo)
+# async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
+#     if message.photo:
+#         await state.update_data(photo=message.photo[-1].file_id)
+#         await state.set_state(SendTextChannel.text)
+#         await message.answer("Tekst kiriting")
+#     else:
+#         await message.answer("Rasim yuboring")
+#
+#
+# @admin_router.message(SendTextChannel.text)
+# async def leagues_handler(message: Message, state: FSMContext):
+#     await state.update_data(text=message.text)
+#     await state.set_state(SendTextChannel.link)
+#     await message.answer("Link yuboring")
+#
+#
+# @admin_router.message(SendTextChannel.link)
+# async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
+#     data = await state.get_data()
+#     if Find(message.text):
+#         try:
+#             await bot.send_photo(data.get('channel_id'), photo=data.get('photo'), caption=message.text)
+#             await message.answer("Kanalga xabar yuborildi")
+#             await message.answer("Settings", reply_markup=settings())
+#         except:
+#             await message.answer("Kanalga xabar yuborishda xatolik, meni admin qiling")
+#             await message.answer("Settings", reply_markup=settings())
+#         await state.clear()
+#     else:
+#         await message.answer("Link notog'ri formatda")
 
 
 @admin_router.callback_query(F.data.startswith('send_'))
