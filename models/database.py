@@ -87,7 +87,12 @@ class AbstractClass:
             query = query.options(selectinload(relationship))
         return (await db.execute(query)).scalar()
 
-
+    @classmethod
+    async def get_chat(cls, chat_id, *, relationship=None):
+        query = select(cls).where(cls.chat_id == chat_id)
+        if relationship:
+            query = query.options(selectinload(relationship))
+        return (await db.execute(query)).scalar()
 
     @classmethod
     async def count(cls):
