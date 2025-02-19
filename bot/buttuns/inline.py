@@ -106,7 +106,7 @@ async def detail_channel(channel_id):
         *[InlineKeyboardButton(text='✅Ishlamoqda✅' if channel.status else '❌O\'chiq❌',
                                callback_data=f'channels_change_{channel.id}'),
           InlineKeyboardButton(text="Xabar jo'natish", callback_data=f'channels_send_{channel_id}'),
-          InlineKeyboardButton(text="Zayafka uchun xabar", callback_data=f'channel_zayafka_{channel_id}'),
+          InlineKeyboardButton(text="Zayafka uchun xabar", callback_data=f'channels_zayafka_{channel_id}'),
           InlineKeyboardButton(text="Ortga", callback_data=f'channels_back_{channel_id}'),
           ])
     ikb.adjust(1, repeat=True)

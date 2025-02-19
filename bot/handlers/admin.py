@@ -174,9 +174,9 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
 
         if new_status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR] and old_status != new_status:
             channel = await Channels.get(update.chat.id)
+            channels_ = await Channels.all()
             if channel is None:
                 await Channels.create(chat_id=update.chat.id, name=update.chat.title, status=True)
-
                 await bot.send_message(
                     admin_1,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
@@ -185,6 +185,8 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
                     admin_2,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
                 )
+                await bot.send_message(admin_1, text='Kanallar', reply_markup=await channels(channels_))
+                await bot.send_message(admin_2, text='Kanallar', reply_markup=await channels(channels_))
 
 
 # ========== Kanallar bilan ishlash
