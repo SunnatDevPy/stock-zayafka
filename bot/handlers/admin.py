@@ -256,24 +256,28 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     text = message.text or message.caption
     photo = message.photo[-1].file_id if message.photo else None
     video = message.video.file_id if message.video else None
-
     if message.reply_markup and isinstance(message.reply_markup, InlineKeyboardMarkup):
         buttons = [[{"text": btn.text, "url": btn.url}] for btn in sum(message.reply_markup.inline_keyboard, [])]
     else:
         buttons = None
+    # if message.reply_markup and isinstance(message.reply_markup, InlineKeyboardMarkup):
+    #     buttons = message.reply_markup.inline_keyboard
+    # else:
+    #     buttons = []
+
     await Channels.update(int(data.get('channel_id')), photo=photo, video=video, text=text, buttons=buttons)
     await message.answer("✅ Xabar saqlandi!")
     channel = await Channels.get(int(data.get('channel_id')))
     buttons = channel.buttons or []
 
     if channel.photo:
-        await bot.send_photo(chat_id=channel.chat_id, photo=channel.photo,
+        await bot.send_photo(chat_id=message.from_user.id, photo=channel.photo,
                              caption=channel.text, reply_markup=links_zayafka(buttons))
     elif channel.video:
-        await bot.send_video(chat_id=channel.chat_id, video=channel.video,
+        await bot.send_video(chat_id=message.from_user.id, video=channel.video,
                              caption=channel.text, reply_markup=links_zayafka(buttons))
     else:
-        await bot.send_message(chat_id=channel.chat_id, text=channel.text,
+        await bot.send_message(chat_id=message.from_user.id, text=channel.text,
                                reply_markup=links_zayafka(buttons))
     await message.answer("Settings", reply_markup=settings())
 
