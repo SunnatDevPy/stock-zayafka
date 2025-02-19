@@ -3,14 +3,13 @@ import logging
 import sys
 
 from aiogram import Dispatcher, Bot
-from aiogram.types import BotCommand, ChatJoinRequest, Update
+from aiogram.types import BotCommand
 
-from bot.buttuns.inline import link
 from bot.handlers.admin import admin_router
 from bot.handlers.start import start_router
 from bot.language import language_router
 from dispatcher import bot
-from models import db, TextInSend, Channels
+from models import db
 
 
 async def on_start(bot: Bot):
