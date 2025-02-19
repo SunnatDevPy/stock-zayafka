@@ -88,7 +88,7 @@ async def channels(channels):
         ikb.add(*[
             InlineKeyboardButton(text=i.name, callback_data=f'channels_info_{i.chat_id}')
         ])
-    # ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/asamax_prizbot?startchannel=true"))
+    # ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/stock_security_bot?startchannel=true"))
     ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/Stockfootball_bot?startchannel=true"))
     ikb.row(InlineKeyboardButton(text="⬅️Ortga️", callback_data="channels_back"))
     ikb.adjust(1, repeat=True)
@@ -124,12 +124,14 @@ async def send_message_button():
     return ikb.as_markup()
 
 
-async def detail_message_channel(channel_id, url=None):
+def detail_message_channel(channel_id, url=None):
     ikb = InlineKeyboardBuilder()
+    if url != None:
+        ikb.row(InlineKeyboardButton(text="Link", url=url))
     ikb.add(
-        *[InlineKeyboardButton(text="Link", url=url) if url else None,
-          InlineKeyboardButton(text="O'zgartirish", callback_data=f'type_change_{channel_id}'),
-          InlineKeyboardButton(text="Ortga", callback_data=f'type_back'),
-          ])
-    ikb.adjust(1, repeat=True)
+        *[
+            InlineKeyboardButton(text="O'zgartirish", callback_data=f'type_change_{channel_id}'),
+            InlineKeyboardButton(text="Ortga", callback_data=f'type_back'),
+        ])
+    ikb.adjust(1, 2)
     return ikb.as_markup()

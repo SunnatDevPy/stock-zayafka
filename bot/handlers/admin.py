@@ -174,9 +174,9 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
 
         if new_status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR] and old_status != new_status:
             channel = await Channels.get(update.chat.id)
-            channels_ = await Channels.all()
             if channel is None:
                 await Channels.create(chat_id=update.chat.id, name=update.chat.title, status=True)
+                channels_ = await Channels.all()
                 await bot.send_message(
                     admin_1,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
@@ -227,7 +227,8 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         await state.update_data(channel_id=channel.chat_id)
         await call.message.delete()
         if channel.text:
-            await call.message.answer_photo(photo=channel.photo, caption=channel.text, reply_markup=link(channel.link))
+            await call.message.answer_photo(photo=channel.photo, caption=channel.text,
+                                            reply_markup=detail_message_channel(channel.chat_id, channel.link))
         else:
             await state.set_state(ZayafkaState.photo)
             await call.message.answer(text="Rasm jo'nating")
@@ -255,11 +256,11 @@ async def leagues_handler(message: Message, state: FSMContext):
     data = await state.get_data()
     channel: Channels = await Channels.get_chat(int(data.get('channel_id')))
     if Find(message.text):
-        await Channels.update(channel.id, link=data.get('link'), photo=data.get('photo'), text=data.get('text'))
+        await Channels.update(channel.id, link=message.text, photo=data.get('photo'), text=data.get('text'))
         await state.clear()
         await message.answer_photo(photo=data.get('photo'), caption=data.get('text'),
-                                   reply_markup=await detail_message_channel(data.get('channel_id'),
-                                                                             url=data.get('link')))
+                                   reply_markup=detail_message_channel(data.get('channel_id'),
+                                                                       url=message.text))
     else:
         await message.answer(text="Link notog'ri formatda")
 
@@ -278,7 +279,11 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         await state.set_state(SendTextChannel.photo)
         await call.message.answer(text=f'Kanalga xabar yuborish uchun 🌆Rasim kiriting')
     if data == 'back':
-        await call.message.edit_text("Settings", reply_markup=settings())
+        try:
+            await call.message.edit_text("Settings", reply_markup=settings())
+        except:
+            await call.message.delete()
+            await call.message.edit_text("Settings", reply_markup=settings())
 
 
 @admin_router.message(ForwardState.text)
