@@ -33,6 +33,11 @@ class ChangeTextSend(StatesGroup):
     text = State()
 
 
+@admin_router.callback_query(F.data.startswith('settings_stock'))
+async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+    await call.message.edit_text("Settings", reply_markup=settings())
+
+
 @admin_router.callback_query(F.data.startswith('settings_'))
 async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     data = call.data.split('_')[-1]

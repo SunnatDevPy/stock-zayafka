@@ -18,7 +18,7 @@ def menu(admin=False):
                                    web_app=WebAppInfo(
                                        url=f'https://football-stock.uz/uz/'))])
     if admin:
-        ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
+        ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='settings_stock')])
     ikb.adjust(1, 2)
     return ikb.as_markup()
 
