@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message, ChatMemberUpdated, InlineKeyboardMarkup, InlineKeyboardButton
 
-from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, text_add, link_from_channel, \
+from bot.buttuns.inline import send_text, confirm_inl, menu, channels, link, settings, link_from_channel, \
     detail_channel, send_message_button, detail_message_channel, links_zayafka
 from models import BotUser, Channels
 
