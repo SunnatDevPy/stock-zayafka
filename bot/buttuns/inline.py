@@ -89,7 +89,7 @@ async def channels(channels):
         ikb.add(*[
             InlineKeyboardButton(text=i.name, callback_data=f'channels_send_{i.chat_id}')
         ])
-    ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/@asamax_prizbot?startchannel=true"))
+    ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/asamax_prizbot?startchannel=true"))
     ikb.row(InlineKeyboardButton(text="⬅️Ortga️", callback_data="channels_back"))
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()
