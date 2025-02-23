@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ChatJoinRequest
 
 from bot.buttuns.inline import language_inl, links_zayafka
-from models import Channels
+from models import Channels, BotUser
 
 start_router = Router()
 
@@ -29,29 +29,21 @@ text = """
 
 Hammasi bizning botda – qo‘shiling!"""
 
+
 @start_router.chat_join_request()
 async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     await bot.send_message(chat_id=chat_join.from_user.id, text=text)
+    user = await BotUser.get(chat_join.from_user.id)
+    if not user:
+        from_user = chat_join.from_user
+        await BotUser.create(id=from_user.id, first_name=from_user.first_name,
+                             last_name=from_user.last_name,
+                             username=from_user.username)
+
     try:
         await chat_join.approve()
     except:
         pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # channel: Channels = await Channels.get_chat(chat_join.chat.id)
 # print(chat_join)
