@@ -14,7 +14,7 @@ def language_inl():
 
 def menu(admin=False):
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="STOCK",
+    ikb.add(*[InlineKeyboardButton(text="LIVE 🔴",
                                    web_app=WebAppInfo(
                                        url=f'https://football-stock.uz/uz/'))])
     if admin:
