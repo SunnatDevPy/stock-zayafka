@@ -170,7 +170,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
 
 
 admin_1 = 5649321700
-admin_2 = 1353080275
+# admin_2 = 1353080275
 
 
 @admin_router.my_chat_member()
@@ -188,13 +188,17 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
                     admin_1,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
                 )
+                # await bot.send_message(
+                #     admin_2,
+                #     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
+                # )
+                await bot.send_message(admin_1, text='Kanallar', reply_markup=await channels(channels_))
+                # await bot.send_message(admin_2, text='Kanallar', reply_markup=await channels(channels_))
+            else:
                 await bot.send_message(
-                    admin_2,
+                    update.chat.id,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
                 )
-                await bot.send_message(admin_1, text='Kanallar', reply_markup=await channels(channels_))
-                await bot.send_message(admin_2, text='Kanallar', reply_markup=await channels(channels_))
-
 
 # ========== Kanallar bilan ishlash
 # ==========

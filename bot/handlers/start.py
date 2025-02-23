@@ -20,25 +20,54 @@ async def command_start(message: Message, state: FSMContext):
     await message.answer(til, reply_markup=language_inl())
 
 
+text = """
+⚽️ Futbol natijalari va jadvallarni real vaqt rejimida kuzatib boring!
+
+📊 Turnir holati va jamoalar joylashuvi
+⚡️ Jonli natijalar va statistikalar
+📅 O‘yin taqvimi va natijalar
+
+Hammasi bizning botda – qo‘shiling!"""
+
 @start_router.chat_join_request()
 async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
-    channel: Channels = await Channels.get_chat(chat_join.chat.id)
-    if channel:
-        if channel.status:
-            if channel.text:
-                await chat_join.approve()
-                buttons = channel.buttons or []
+    await bot.send_message(chat_id=chat_join.from_user.id, text=text)
+    await chat_join.approve()
 
-                if channel.photo:
-                    await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo,
-                                         caption=channel.text, reply_markup=links_zayafka(buttons))
-                elif channel.video:
-                    await bot.send_video(chat_id=chat_join.from_user.id, video=channel.video,
-                                         caption=channel.text, reply_markup=links_zayafka(buttons))
-                else:
-                    await bot.send_message(chat_id=chat_join.from_user.id, text=channel.text,
-                                           reply_markup=links_zayafka(buttons))
-            else:
-                await bot.send_message(chat_id=chat_join.from_user.id, text='Xush kelibsiz')
-    # else:
-    #     await bot.send_message(chat_id=chat_join.from_user.id, text="Xatolik yuz berdi")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# channel: Channels = await Channels.get_chat(chat_join.chat.id)
+# print(chat_join)
+# if channel:
+#     if channel.status:
+#         if channel.text:
+#             await chat_join.approve()
+#             buttons = channel.buttons or []
+#
+#             if channel.photo:
+#                 await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo,
+#                                      caption=channel.text, reply_markup=links_zayafka(buttons))
+#             elif channel.video:
+#                 await bot.send_video(chat_id=chat_join.from_user.id, video=channel.video,
+#                                      caption=channel.text, reply_markup=links_zayafka(buttons))
+#             else:
+#                 await bot.send_message(chat_id=chat_join.from_user.id, text=channel.text,
+#                                        reply_markup=links_zayafka(buttons))
+#         else:
+#             await bot.send_message(chat_id=chat_join.from_user.id, text='Xush kelibsiz')
+# else:
+#     await bot.send_message(chat_id=chat_join.from_user.id, text="Xatolik yuz berdi")

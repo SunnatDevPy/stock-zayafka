@@ -53,7 +53,7 @@ async def main():
     dp.shutdown.register(on_shutdown)
     # dp.update.middleware(handle_chat_join_request)
 
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 
 if __name__ == '__main__':

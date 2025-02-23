@@ -26,7 +26,7 @@ def menu(admin=False):
 def settings():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="Userlar soni", callback_data='settings_static'),
-              InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
+              # InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
               InlineKeyboardButton(text="➕Kanallar➕", callback_data='settings_subscribe'),
               InlineKeyboardButton(text="⬅️Ortga", callback_data='settings_back')])
     ikb.adjust(2, repeat=True)
@@ -88,8 +88,8 @@ async def channels(channels):
         ikb.add(*[
             InlineKeyboardButton(text=i.name, callback_data=f'channels_info_{i.chat_id}')
         ])
-    # ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/stock_security_bot?startchannel=true"))
-    ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/Stockfootball_bot?startchannel=true"))
+    ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/stock_security_bot?startchannel=true"))
+    # ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/Stockfootball_bot?startchannel=true"))
     ikb.row(InlineKeyboardButton(text="⬅️Ortga️", callback_data="channels_back"))
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()
