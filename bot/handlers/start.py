@@ -32,7 +32,10 @@ Hammasi bizning botda – qo‘shiling!"""
 @start_router.chat_join_request()
 async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     await bot.send_message(chat_id=chat_join.from_user.id, text=text)
-    await chat_join.approve()
+    try:
+        await chat_join.approve()
+    except:
+        pass
 
 
 
