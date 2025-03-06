@@ -26,8 +26,8 @@ def menu(admin=False):
 def settings():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="Userlar soni", callback_data='settings_static'),
-              # InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
               InlineKeyboardButton(text="➕Kanallar➕", callback_data='settings_subscribe'),
+              InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
               InlineKeyboardButton(text="⬅️Ortga", callback_data='settings_back')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
@@ -39,6 +39,12 @@ def link(url):
     return ikb.as_markup()
 
 
+def start():
+    ikb = InlineKeyboardBuilder()
+    ikb.row(InlineKeyboardButton(text='START', url="https://t.me/Stockfootball_bot?start=your_parameter"))
+    return ikb.as_markup()
+
+
 def link_from_channel(links):
     ikb = InlineKeyboardBuilder()
     for btn in links:
@@ -47,21 +53,20 @@ def link_from_channel(links):
     return ikb.as_markup()
 
 
-def text_add(status=False):
+def send_text():
     ikb = InlineKeyboardBuilder()
-    if status:
-        ikb.row(InlineKeyboardButton(text="➕Qo'shish➕", callback_data="text_add"))
-    else:
-        ikb.row(InlineKeyboardButton(text="🔃O'zgartirish🔃", callback_data="text_change"))
-    ikb.row(InlineKeyboardButton(text="👈Ortga👈", callback_data="text_back"))
+    ikb.add(*[InlineKeyboardButton(text="Barcha Userlari uchun", callback_data='send_user'),
+              InlineKeyboardButton(text="Barcha kanallar uchun", callback_data='send_channel'),
+              InlineKeyboardButton(text="⬅️Ortga", callback_data='send_back')])
+    ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
 
-def send_text():
+def send_text_type(text):
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="Oddiy xabar", callback_data='send_text'),
-              InlineKeyboardButton(text="📸Rasm-Videoli Xabar🎥", callback_data='send_video'),
-              InlineKeyboardButton(text="⬅️Ortga", callback_data='send_back')])
+    ikb.add(*[InlineKeyboardButton(text="Tayyor text", callback_data=f'types_forward_{text}'),
+              InlineKeyboardButton(text="Yaratish", callback_data=f'types_create_{text}'),
+              InlineKeyboardButton(text="⬅️Ortga", callback_data='types_back')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
@@ -114,11 +119,11 @@ async def detail_channel(channel_id):
     return ikb.as_markup()
 
 
-async def send_message_button():
+async def send_message_button(anons=''):
     ikb = InlineKeyboardBuilder()
     ikb.add(
-        *[InlineKeyboardButton(text="Ko'chirilgan xabar", callback_data=f'type_forward'),
-          InlineKeyboardButton(text="Custom yaratish", callback_data=f'type_send'),
+        *[InlineKeyboardButton(text="Ko'chirilgan xabar", callback_data=f'type_forward_{anons}'),
+          InlineKeyboardButton(text="Custom yaratish", callback_data=f'type_custom_{anons}'),
           InlineKeyboardButton(text="Ortga", callback_data=f'type_back'),
           ])
     ikb.adjust(1, repeat=True)
@@ -145,3 +150,5 @@ def links_zayafka(buttons):
         *[InlineKeyboardButton(text=i[0].get('text'), url=i[0].get('url')) for i in buttons])
     ikb.adjust(1, 2)
     return ikb.as_markup()
+
+
