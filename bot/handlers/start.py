@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ChatJoinRequest, ChatMemberUpdated
 
-from bot.buttuns.inline import language_inl, start, channels
+from bot.buttuns.inline import language_inl, start, channels, links_zayafka
 from models import BotUser, Channels
 
 start_router = Router()
@@ -33,15 +33,28 @@ Hammasi bizning botda – qo‘shiling!"""
 
 @start_router.chat_join_request()
 async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
-    await bot.send_message(chat_id=chat_join.from_user.id, text=text,
-                           reply_markup=start())
     user = await BotUser.get(chat_join.from_user.id)
+
     if not user:
         from_user = chat_join.from_user
         await BotUser.create(id=from_user.id, first_name=from_user.first_name,
                              last_name=from_user.last_name,
                              username=from_user.username)
-
+    channel: Channels = await Channels.get_chat(chat_join.chat.id)
+    if channel:
+        try:
+            if channel.text and channel.photo:
+                await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo, caption=channel.text,
+                                     reply_markup=await links_zayafka(channel.chat_id))
+            else:
+                await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+                                       reply_markup=start())
+        except:
+            await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+                                   reply_markup=start())
+    else:
+        await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+                               reply_markup=start())
     try:
         await chat_join.approve()
     except:

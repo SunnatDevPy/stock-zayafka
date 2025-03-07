@@ -128,11 +128,11 @@ async def send_message_button():
 
 
 async def detail_message_channel(channel_id):
-    buttons = await Buttons.get_chat(channel_id)
+    buttons: list[Buttons] = await Buttons.get_chat(channel_id)
     ikb = InlineKeyboardBuilder()
     if buttons != None:
         ikb.add(
-            *[InlineKeyboardButton(text=i[0].get('text'), url=i[0].get('url')) for i in buttons])
+            *[InlineKeyboardButton(text=i.name, url=i.link) for i in buttons])
     ikb.add(
         *[
             InlineKeyboardButton(text="O'zgartirish", callback_data=f'type_change_{channel_id}'),
@@ -142,9 +142,11 @@ async def detail_message_channel(channel_id):
     return ikb.as_markup()
 
 
-def links_zayafka(buttons):
+async def links_zayafka(channel_id):
+    buttons: list[Buttons] = await Buttons.get_chat(channel_id)
+
     ikb = InlineKeyboardBuilder()
     ikb.add(
-        *[InlineKeyboardButton(text=i[0].get('text'), url=i[0].get('url')) for i in buttons])
-    ikb.adjust(1, 2)
+        *[InlineKeyboardButton(text=i.name, url=i.link) for i in buttons])
+    ikb.adjust(1)
     return ikb.as_markup()

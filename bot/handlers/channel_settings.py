@@ -6,7 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message, InlineKeyboardButton
 
 from bot.buttuns.inline import settings, detail_channel, send_message_button, detail_message_channel, channels, \
-    links_zayafka, link_from_channel
+    link_from_channel
 from models import Channels
 from models.users import Buttons
 
