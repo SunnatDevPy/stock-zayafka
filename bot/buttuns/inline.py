@@ -30,7 +30,7 @@ def settings():
               InlineKeyboardButton(text="➕Kanallar➕", callback_data='settings_subscribe'),
               InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
               InlineKeyboardButton(text="⬅️Ortga", callback_data='settings_back')])
-    ikb.adjust(2, repeat=True)
+    ikb.adjust(1, repeat=True)
     return ikb.as_markup()
 
 
