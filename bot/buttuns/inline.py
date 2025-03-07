@@ -2,6 +2,7 @@ from aiogram.types import InlineKeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from models import Channels
+from models.users import Buttons
 
 
 def language_inl():
@@ -91,7 +92,7 @@ async def channels(channels):
     ikb = InlineKeyboardBuilder()
     for i in channels:
         ikb.add(*[
-            InlineKeyboardButton(text=i.name, callback_data=f'channels_info_{i.chat_id}')
+            InlineKeyboardButton(text=i.name, callback_data=f'channels_info_{i.id}_{i.chat_id}')
         ])
     ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/stock_security_bot?startchannel=true"))
     # ikb.row(InlineKeyboardButton(text="Kanalga qo'shish", url=f"https://t.me/Stockfootball_bot?startchannel=true"))
@@ -103,10 +104,6 @@ async def channels(channels):
 async def detail_channel(channel_id):
     ikb = InlineKeyboardBuilder()
     channel = await Channels.get(int(channel_id))
-    if channel:
-        pass
-    else:
-        channel = await Channels.get_chat(int(channel_id))
     ikb.add(
         *[InlineKeyboardButton(text='✅Ishlamoqda✅' if channel.status else '❌O\'chiq❌',
                                callback_data=f'channels_change_{channel.id}'),
@@ -119,18 +116,19 @@ async def detail_channel(channel_id):
     return ikb.as_markup()
 
 
-async def send_message_button(anons=''):
+async def send_message_button():
     ikb = InlineKeyboardBuilder()
     ikb.add(
-        *[InlineKeyboardButton(text="Ko'chirilgan xabar", callback_data=f'type_forward_{anons}'),
-          InlineKeyboardButton(text="Custom yaratish", callback_data=f'type_custom_{anons}'),
+        *[InlineKeyboardButton(text="Ko'chirilgan xabar", callback_data=f'type_forward'),
+          InlineKeyboardButton(text="Custom yaratish", callback_data=f'type_custom'),
           InlineKeyboardButton(text="Ortga", callback_data=f'type_back'),
           ])
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()
 
 
-def detail_message_channel(channel_id, buttons=None):
+async def detail_message_channel(channel_id):
+    buttons = await Buttons.get_chat(channel_id)
     ikb = InlineKeyboardBuilder()
     if buttons != None:
         ikb.add(
@@ -150,5 +148,3 @@ def links_zayafka(buttons):
         *[InlineKeyboardButton(text=i[0].get('text'), url=i[0].get('url')) for i in buttons])
     ikb.adjust(1, 2)
     return ikb.as_markup()
-
-

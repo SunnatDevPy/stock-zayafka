@@ -6,6 +6,8 @@ from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand
 
 from bot.handlers.admin import admin_router
+from bot.handlers.bot_announse import bot_anons_router
+from bot.handlers.channel_settings import channel_router
 from bot.handlers.start import start_router
 from bot.language import language_router
 from dispatcher import bot
@@ -48,7 +50,7 @@ async def on_shutdown(bot: Bot):
 
 async def main():
     dp = Dispatcher()
-    dp.include_routers(start_router, language_router, admin_router)
+    dp.include_routers(start_router, language_router, admin_router, bot_anons_router, channel_router)
     dp.startup.register(on_start)
     dp.shutdown.register(on_shutdown)
     # dp.update.middleware(handle_chat_join_request)

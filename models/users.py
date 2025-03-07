@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Text, JSON
+from sqlalchemy import BigInteger, Text, JSON, ForeignKey
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped
 
@@ -15,12 +15,16 @@ class BotUser(BaseModel):
 
 
 class Channels(BaseModel):
-    chat_id: Mapped[int] = mapped_column(BigInteger)  # ID чата (канала)
-    name: Mapped[str]  # Название канала
-    text: Mapped[str] = mapped_column(nullable=True)  # Текст сообщения
-    photo: Mapped[str] = mapped_column(nullable=True)  # Фото (file_id)
-    video: Mapped[str] = mapped_column(nullable=True)  # Видео (file_id)
-    document: Mapped[str] = mapped_column(nullable=True)  # Документ (file_id)
-    status: Mapped[bool]  # Статус канала
-    link: Mapped[str] = mapped_column(nullable=True)  # Ссылка
-    buttons: Mapped[dict] = mapped_column(JSON, nullable=True)
+    chat_id: Mapped[int] = mapped_column(BigInteger)
+    name: Mapped[str]
+    text: Mapped[str] = mapped_column(nullable=True)
+    photo: Mapped[str] = mapped_column(nullable=True)
+    video: Mapped[str] = mapped_column(nullable=True)
+    status: Mapped[bool]
+    link: Mapped[str] = mapped_column(nullable=True)
+
+
+class Buttons(BaseModel):
+    channel_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('channels.id', ondelete="CASCADE"))
+    link: Mapped[str] = mapped_column(nullable=True)
+    name: Mapped[str] = mapped_column(nullable=True)
