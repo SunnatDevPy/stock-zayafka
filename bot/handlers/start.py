@@ -77,6 +77,7 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
                                reply_markup=start())
 
 
+
 admin_1 = 5649321700
 admin_2 = 1353080275
 
