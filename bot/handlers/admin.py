@@ -61,6 +61,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.answer(text=f'Assalomu aleykum Admin {call.from_user.first_name}',
                                   reply_markup=menu(admin=True))
     elif data == 'zayafka':
+        await call.message.delete()
         zayafka_text = await TextZayafka.get(1)
         if zayafka_text:
             await call.message.answer_photo(photo=zayafka_text.photo, caption=zayafka_text.name,
@@ -102,8 +103,11 @@ async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
 @admin_router.callback_query(F.data.startswith('zayafka_'))
 async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     data = call.data.split('_')[-1]
+    print(data)
     if data == 'change':
+        await call.message.delete()
         await state.set_state(ZayafkaText.photo)
         await call.message.answer("Rasim kiriting")
     else:
+        await call.message.delete()
         await call.message.answer("Settings", reply_markup=settings())
