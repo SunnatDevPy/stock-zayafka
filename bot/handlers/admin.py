@@ -47,4 +47,8 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
             except:
                 await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
     elif data == 'back':
-        await call.message.answer(text='Bosh menu', reply_markup=menu(admin=True))
+        try:
+            await call.message.delete()
+        except:
+            pass
+        await call.message.answer(text=f'Assalomu aleykum Admin {call.from_user.first_name}', reply_markup=menu(admin=True))

@@ -64,8 +64,6 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
 admin_1 = 5649321700
 
 
-# admin_2 = 1353080275
-
 
 @start_router.my_chat_member()
 async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):

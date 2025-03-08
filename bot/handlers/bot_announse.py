@@ -58,9 +58,6 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
 async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
     if data.get('status') == 'forward':
-        if not message.forward_from and not message.forward_from_chat:
-            await message.answer("⚠️ Tayyor xabarni yuboring.")
-            return
 
         text = message.text or message.caption
         reply_markup = message.reply_markup

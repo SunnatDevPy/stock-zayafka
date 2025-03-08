@@ -101,15 +101,17 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
     channel: Channels = await Channels.get_chat(int(data.get('channel_id')))
 
-    if not message.forward_from and not message.forward_from_chat:
-        await message.answer("⚠️ Tayyor xabarni yuboring.")
-        return
-
     text = message.text or message.caption
     reply_markup = message.reply_markup
     photo = message.photo[-1].file_id if message.photo else None
+    if channel.text == None:
+        await Channels.create(text=text, photo=photo)
 
-    await Channels.update(channel.id, text=text, photo=photo)
+    else:
+        await Channels.update(channel.id, text=text, photo=photo)
+        buttons = await Buttons.get_chat(channel.chat_id)
+        for i in buttons:
+            await Buttons.delete(i.id)
 
     if reply_markup and isinstance(reply_markup, InlineKeyboardMarkup):
         for row in reply_markup.inline_keyboard:
@@ -124,9 +126,6 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
 @channel_router.message(ForwardState.text)
 async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
-    if not message.forward_from and not message.forward_from_chat:
-        await message.answer("⚠️ Tayyor xabarni yuboring.")
-        return
 
     text = message.text or message.caption
     reply_markup = message.reply_markup
