@@ -70,14 +70,15 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     #             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
     #                                    reply_markup=start())
     # else:
-    # if zayafka_text:
-    #     await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
-    # else:
-    await bot.send_message(chat_id=chat_join.from_user.id, text=text,
-                           reply_markup=start())
+    if zayafka_text:
+        await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
+    else:
+        await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+                               reply_markup=start())
 
 
 admin_1 = 5649321700
+admin_2 = 1353080275
 
 
 @start_router.my_chat_member()
@@ -95,10 +96,10 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
                     admin_1,
                     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
                 )
-                # await bot.send_message(
-                #     admin_2,
-                #     f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})"
-                # )
+                await bot.send_message(
+                    update.from_user.id,
+                    f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})\n\nMen shu kanalga zayafka qabul qilaman"
+                )
                 await bot.send_message(admin_1, text='Kanallar', reply_markup=await channels(channels_))
                 # await bot.send_message(admin_2, text='Kanallar', reply_markup=await channels(channels_))
             else:
