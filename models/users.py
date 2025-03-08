@@ -28,3 +28,8 @@ class Buttons(BaseModel):
     channel_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(Channels.id, ondelete="CASCADE"))
     link: Mapped[str] = mapped_column(nullable=True)
     name: Mapped[str] = mapped_column(nullable=True)
+
+
+class TextZayafka(BaseModel):
+    photo: Mapped[str]
+    name: Mapped[str]

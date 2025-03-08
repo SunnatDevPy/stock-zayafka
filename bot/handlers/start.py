@@ -6,6 +6,7 @@ from aiogram.types import Message, ChatJoinRequest, ChatMemberUpdated
 
 from bot.buttuns.inline import language_inl, start, channels, links_zayafka
 from models import BotUser, Channels
+from models.users import TextZayafka
 
 start_router = Router()
 
@@ -34,7 +35,7 @@ Hammasi bizning botda – qo‘shiling!"""
 @start_router.chat_join_request()
 async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     user = await BotUser.get(chat_join.from_user.id)
-
+    zayafka_text = await TextZayafka.get(1)
     if not user:
         from_user = chat_join.from_user
         await BotUser.create(id=from_user.id, first_name=from_user.first_name,
@@ -46,15 +47,25 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
             if channel.text and channel.photo:
                 await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo, caption=channel.text,
                                      reply_markup=await links_zayafka(channel.chat_id))
+            if zayafka_text:
+                await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo,
+                                     caption=zayafka_text.text)
             else:
                 await bot.send_message(chat_id=chat_join.from_user.id, text=text,
                                        reply_markup=start())
         except:
+            if zayafka_text:
+                await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo,
+                                     caption=zayafka_text.text)
+            else:
+                await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+                                       reply_markup=start())
+    else:
+        if zayafka_text:
+            await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.text)
+        else:
             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
                                    reply_markup=start())
-    else:
-        await bot.send_message(chat_id=chat_join.from_user.id, text=text,
-                               reply_markup=start())
     try:
         await chat_join.approve()
     except:
@@ -62,7 +73,6 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
 
 
 admin_1 = 5649321700
-
 
 
 @start_router.my_chat_member()

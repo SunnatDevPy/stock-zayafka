@@ -1,13 +1,20 @@
 from aiogram import Bot, F, Router, html
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.fsm.state import StatesGroup, State
+from aiogram.types import CallbackQuery, Message
 
-from bot.buttuns.inline import send_text, menu, channels, settings
+from bot.buttuns.inline import send_text, menu, channels, settings, zayafka_change
 from models import BotUser, Channels
+from models.users import TextZayafka
 
 admin_router = Router()
 
 import re
+
+
+class ZayafkaText(StatesGroup):
+    photo = State()
+    text = State()
 
 
 def Find(string):
@@ -51,4 +58,55 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
             await call.message.delete()
         except:
             pass
-        await call.message.answer(text=f'Assalomu aleykum Admin {call.from_user.first_name}', reply_markup=menu(admin=True))
+        await call.message.answer(text=f'Assalomu aleykum Admin {call.from_user.first_name}',
+                                  reply_markup=menu(admin=True))
+    elif data == 'zayafka':
+        zayafka_text = await TextZayafka.get(1)
+        if zayafka_text:
+            await call.message.answer_photo(photo=zayafka_text.photo, caption=zayafka_text.name,
+                                            reply_markup=zayafka_change())
+        else:
+            await state.set_state(ZayafkaText.photo)
+            await call.message.answer('Rasim yuboring')
+
+
+@admin_router.message(ZayafkaText.photo)
+async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
+    if message.photo:
+        await state.update_data(photo=message.photo[-1].file_id)
+        await state.set_state(ZayafkaText.text)
+        await message.answer('Text kiriting')
+    else:
+        await message.answer("Rasim jo'nating")
+
+
+@admin_router.message(ZayafkaText.text)
+async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    zayafka_text = await TextZayafka.get(1)
+    if message.photo:
+        try:
+            if zayafka_text:
+                await TextZayafka.update(1, photo=data.get('photo'), text=message.text)
+                await message.answer("Muvoffaqyatli o'zgardi!✅")
+                await message.answer_photo(photo=data.get('photo'), caption=message.text, reply_markup=zayafka_change())
+            else:
+                text = await TextZayafka.create(photo=data.get('photo'), text=message.text)
+                await message.answer("Muvoffaqyatli saqlandi!✅")
+                await message.answer_photo(photo=text.photo, caption=text.name, reply_markup=zayafka_change())
+        except:
+            await message.answer("Saqlashda xatolik!❌")
+            await message.answer("Settings", reply_markup=settings())
+
+    else:
+        await message.answer("Rasim jo'nating⚡")
+
+
+@admin_router.callback_query(F.data.startswith('zayafka_'))
+async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+    data = call.data.split('_')[-1]
+    if data == 'change':
+        await state.set_state(ZayafkaText.photo)
+        await call.message.answer("Rasim kiriting")
+    else:
+        await call.message.answer("Settings", reply_markup=settings())

@@ -29,6 +29,7 @@ def settings():
     ikb.add(*[InlineKeyboardButton(text="Userlar soni", callback_data='settings_static'),
               InlineKeyboardButton(text="➕Kanallar➕", callback_data='settings_subscribe'),
               InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
+              InlineKeyboardButton(text="Umumiy zayafka", callback_data='settings_zayafka'),
               InlineKeyboardButton(text="⬅️Ortga", callback_data='settings_back')])
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()
@@ -76,6 +77,13 @@ def confirm_text():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="✅Jo'natish✅", callback_data='confirm'),
               InlineKeyboardButton(text="❌To'xtatish❌", callback_data='stop')])
+    ikb.adjust(2, repeat=True)
+    return ikb.as_markup()
+
+def zayafka_change():
+    ikb = InlineKeyboardBuilder()
+    ikb.add(*[InlineKeyboardButton(text="✅O'zgartirish✅", callback_data='zayafka_chagne'),
+              InlineKeyboardButton(text="Ortga", callback_data='zayafka_back')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
