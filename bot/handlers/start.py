@@ -43,10 +43,12 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
 
     if not user:
         from_user = chat_join.from_user
-        await BotUser.create(id=from_user.id, first_name=from_user.first_name,
-                             last_name=from_user.last_name,
-                             username=from_user.username)
-
+        try:
+            await BotUser.create(id=from_user.id, first_name=from_user.first_name,
+                                 last_name=from_user.last_name,
+                                 username=from_user.username)
+        except:
+            await bot.send_message(5649321700, f'user: {from_user}')
     channel: Channels = await Channels.get_chat(chat_join.chat.id)
     # if channel:
     #     try:
@@ -67,11 +69,11 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     #             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
     #                                    reply_markup=start())
     # else:
-    # if zayafka_text:
-    #     await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
-    # else:
-    await bot.send_message(chat_id=chat_join.from_user.id, text=text,
-                           reply_markup=start())
+    if zayafka_text:
+        await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
+    else:
+        await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+                               reply_markup=start())
 
 
 admin_1 = 5649321700
