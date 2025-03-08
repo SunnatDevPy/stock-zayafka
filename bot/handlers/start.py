@@ -42,29 +42,29 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
                              last_name=from_user.last_name,
                              username=from_user.username)
     channel: Channels = await Channels.get_chat(chat_join.chat.id)
-    if channel:
-        try:
-            if channel.text and channel.photo:
-                await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo, caption=channel.text,
-                                     reply_markup=await links_zayafka(channel.chat_id))
-            if zayafka_text:
-                await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo,
-                                     caption=zayafka_text.name)
-            else:
-                await bot.send_message(chat_id=chat_join.from_user.id, text=text,
-                                       reply_markup=start())
-        except:
-            if zayafka_text:
-                await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo,
-                                     caption=zayafka_text.name)
-            else:
-                await bot.send_message(chat_id=chat_join.from_user.id, text=text,
-                                       reply_markup=start())
-    else:
-        if zayafka_text:
-            await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
-        else:
-            await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+    # if channel:
+    #     try:
+    #         if channel.text and channel.photo:
+    #             await bot.send_photo(chat_id=chat_join.from_user.id, photo=channel.photo, caption=channel.text,
+    #                                  reply_markup=await links_zayafka(channel.chat_id))
+    #         if zayafka_text:
+    #             await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo,
+    #                                  caption=zayafka_text.name)
+    #         else:
+    #             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+    #                                    reply_markup=start())
+    #     except:
+    #         if zayafka_text:
+    #             await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo,
+    #                                  caption=zayafka_text.name)
+    #         else:
+    #             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+    #                                    reply_markup=start())
+    # else:
+    #     if zayafka_text:
+    #         await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
+    #     else:
+    await bot.send_message(chat_id=chat_join.from_user.id, text=text,
                                    reply_markup=start())
     try:
         await chat_join.approve()
