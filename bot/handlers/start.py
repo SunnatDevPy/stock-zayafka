@@ -43,12 +43,11 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
 
     if not user:
         from_user = chat_join.from_user
-        try:
-            await BotUser.create(id=from_user.id, first_name=from_user.first_name,
+
+        await BotUser.create(id=from_user.id, first_name=from_user.first_name,
                                  last_name=from_user.last_name,
                                  username=from_user.username)
-        except:
-            await bot.send_message(5649321700, f'user: {from_user}')
+
     channel: Channels = await Channels.get_chat(chat_join.chat.id)
     # if channel:
     #     try:
