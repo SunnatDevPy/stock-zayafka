@@ -87,11 +87,11 @@ async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
 
     try:
         if zayafka_text:
-            await TextZayafka.update(1, photo=data.get('photo'), text=message.text)
+            await TextZayafka.update(1, photo=data.get('photo'), name=message.text)
             await message.answer("Muvoffaqyatli o'zgardi!✅")
             await message.answer_photo(photo=data.get('photo'), caption=message.text, reply_markup=zayafka_change())
         else:
-            text = await TextZayafka.create(photo=data.get('photo'), text=message.text)
+            text = await TextZayafka.create(photo=data.get('photo'), name=message.text)
             await message.answer("Muvoffaqyatli saqlandi!✅")
             await message.answer_photo(photo=text.photo, caption=text.name, reply_markup=zayafka_change())
     except:
