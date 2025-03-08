@@ -69,10 +69,10 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     #             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
     #                                    reply_markup=start())
     # else:
-    if zayafka_text:
-        await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
-    else:
-        await bot.send_message(chat_id=chat_join.from_user.id, text=text,
+    # if zayafka_text:
+    #     await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
+    # else:
+    await bot.send_message(chat_id=chat_join.from_user.id, text=text,
                                reply_markup=start())
 
 
