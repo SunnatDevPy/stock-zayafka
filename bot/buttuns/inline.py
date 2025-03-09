@@ -80,11 +80,13 @@ def confirm_text():
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
-def zayafka_change():
+
+def zayafka_change(status):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="✅O'zgartirish✅", callback_data='zayafka_change'),
-              InlineKeyboardButton(text="Ortga", callback_data='zayafka_back')])
-    ikb.adjust(2, repeat=True)
+              InlineKeyboardButton(text="Ortga", callback_data='zayafka_back'),
+              InlineKeyboardButton(text='✅Ishlamoqda✅' if status else '❌O\'chiq❌', callback_data=f'zayafka_status')])
+    ikb.adjust(1, repeat=True)
     return ikb.as_markup()
 
 

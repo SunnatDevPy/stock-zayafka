@@ -65,7 +65,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         zayafka_text = await TextZayafka.get(1)
         if zayafka_text:
             await call.message.answer_photo(photo=zayafka_text.photo, caption=zayafka_text.name,
-                                            reply_markup=zayafka_change())
+                                            reply_markup=zayafka_change(zayafka_text.status))
         else:
             await state.set_state(ZayafkaText.photo)
             await call.message.answer('Rasim yuboring')
@@ -90,11 +90,11 @@ async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
         if zayafka_text:
             await TextZayafka.update(1, photo=data.get('photo'), name=message.text)
             await message.answer("Muvoffaqyatli o'zgardi!✅")
-            await message.answer_photo(photo=data.get('photo'), caption=message.text, reply_markup=zayafka_change())
+            await message.answer_photo(photo=data.get('photo'), caption=message.text, reply_markup=zayafka_change(zayafka_text.status))
         else:
             text = await TextZayafka.create(photo=data.get('photo'), name=message.text)
             await message.answer("Muvoffaqyatli saqlandi!✅")
-            await message.answer_photo(photo=text.photo, caption=text.name, reply_markup=zayafka_change())
+            await message.answer_photo(photo=text.photo, caption=text.name, reply_markup=zayafka_change(zayafka_text.status))
     except:
         await message.answer("Saqlashda xatolik!❌")
         await message.answer("Settings", reply_markup=settings())
@@ -108,6 +108,19 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.delete()
         await state.set_state(ZayafkaText.photo)
         await call.message.answer("Rasim kiriting")
+    elif data == 'status':
+        zayafka_text: TextZayafka = await TextZayafka.get(1)
+        if zayafka_text.status:
+            status = False
+        else:
+            status = True
+        await TextZayafka.update(1, status=status)
+        try:
+            await call.message.edit_reply_markup(inline_message_id=call.inline_message_id,
+                                                 reply_markup=zayafka_change(status))
+        except:
+            await call.message.answer_photo(photo=zayafka_text.photo, caption=zayafka_text.name,
+                                            reply_markup=zayafka_change(status))
     else:
         await call.message.delete()
         await call.message.answer("Settings", reply_markup=settings())

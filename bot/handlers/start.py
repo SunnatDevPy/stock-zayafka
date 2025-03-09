@@ -40,8 +40,8 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
         pass
     await bot.send_message(chat_id=chat_join.from_user.id, text=text,
                            reply_markup=start())
-    user = await BotUser.get(chat_join.from_user.id)
-    zayafka_text = await TextZayafka.get(1)
+    user: BotUser = await BotUser.get(chat_join.from_user.id)
+    zayafka_text: TextZayafka = await TextZayafka.get(1)
 
     if not user:
         from_user = chat_join.from_user
@@ -70,12 +70,11 @@ async def zayafka(chat_join: ChatJoinRequest, bot: Bot):
     #             await bot.send_message(chat_id=chat_join.from_user.id, text=text,
     #                                    reply_markup=start())
     # else:
-    if zayafka_text:
+    if zayafka_text and getattr(zayafka_text, "status", None):
         await bot.send_photo(chat_id=chat_join.from_user.id, photo=zayafka_text.photo, caption=zayafka_text.name)
     else:
         await bot.send_message(chat_id=chat_join.from_user.id, text=text,
                                reply_markup=start())
-
 
 
 admin_1 = 5649321700

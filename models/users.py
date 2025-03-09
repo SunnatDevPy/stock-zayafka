@@ -33,3 +33,4 @@ class Buttons(BaseModel):
 class TextZayafka(BaseModel):
     photo: Mapped[str]
     name: Mapped[str]
+    status: Mapped[bool]
