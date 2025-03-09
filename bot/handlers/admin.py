@@ -86,18 +86,21 @@ async def leagues_handler(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
     zayafka_text = await TextZayafka.get(1)
 
-    try:
-        if zayafka_text:
-            await TextZayafka.update(1, photo=data.get('photo'), name=message.text)
-            await message.answer("Muvoffaqyatli o'zgardi!✅")
-            await message.answer_photo(photo=data.get('photo'), caption=message.text, reply_markup=zayafka_change(zayafka_text.status))
-        else:
-            text = await TextZayafka.create(photo=data.get('photo'), name=message.text, status=True)
-            await message.answer("Muvoffaqyatli saqlandi!✅")
-            await message.answer_photo(photo=text.photo, caption=text.name, reply_markup=zayafka_change(zayafka_text.status))
-    except:
-        await message.answer("Saqlashda xatolik!❌")
-        await message.answer("Settings", reply_markup=settings())
+    # try:
+    if zayafka_text:
+        await TextZayafka.update(1, photo=data.get('photo'), name=message.text)
+        await message.answer_photo(photo=data.get('photo'), caption=message.text,
+                                   reply_markup=zayafka_change(zayafka_text.status))
+        await message.answer("Muvoffaqyatli o'zgardi!✅")
+    else:
+        zayafka_text: TextZayafka = await TextZayafka.create(photo=data.get('photo'), name=message.text, status=True)
+        await message.answer_photo(photo=zayafka_text.photo, caption=zayafka_text.name,
+                                   reply_markup=zayafka_change(zayafka_text.status))
+        await message.answer("Muvoffaqyatli saqlandi!✅")
+
+    # except:
+    #     await message.answer("Saqlashda xatolik!❌")
+    #     await message.answer("Settings", reply_markup=settings())
 
 
 @admin_router.callback_query(F.data.startswith('zayafka_'))
