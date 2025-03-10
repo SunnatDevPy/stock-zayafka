@@ -100,7 +100,7 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
                 )
                 await bot.send_message(
                     update.from_user.id,
-                    f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})\n\nMen shu kanalga zayafka qabul qilaman"
+                    f"✅ Bot kanalga qo'shildi: {update.chat.title} (Kanal ID: {update.chat.id})\n\nMen shu kanalga zayafka qabul qilaman va xabar yuboraman"
                 )
                 await bot.send_message(admin_1, text='Kanallar', reply_markup=await channels(channels_))
                 # await bot.send_message(admin_2, text='Kanallar', reply_markup=await channels(channels_))
