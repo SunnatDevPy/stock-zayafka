@@ -137,7 +137,7 @@ async def send_message_button():
 
 
 async def detail_message_channel(channel_id):
-    buttons: list[Buttons] = await Buttons.get_chat(channel_id)
+    buttons: list[Buttons] = await Buttons.get(channel_id)
     ikb = InlineKeyboardBuilder()
     if buttons != None:
         ikb.add(

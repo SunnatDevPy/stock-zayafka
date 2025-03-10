@@ -38,13 +38,12 @@ class SendTextChannelState(StatesGroup):
 async def leagues_handler(call: CallbackQuery, state: FSMContext):
     data = call.data.split('_')
     await state.update_data(channel_id=data[-1])
+    channel = await Channels.get(int(data[2]))
     if data[1] == 'back':
         await call.message.edit_text("Settings", reply_markup=settings())
     if data[1] == 'info':
-        channel = await Channels.get_chat(chat_id=int(data[-1]))
         await call.message.edit_text(text=f'Detail: {channel.name}', reply_markup=await detail_channel(data[2]))
     if data[1] == 'change':
-        channel = await Channels.get(int(data[2]))
         if channel.status:
             status = False
         else:
@@ -99,7 +98,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
 @channel_router.message(ZayafkaState.text)
 async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
-    channel: Channels = await Channels.get_chat(int(data.get('channel_id')))
+    channel: Channels = await Channels.get(int(data.get('channel_id')))
 
     text = message.text or message.caption
     reply_markup = message.reply_markup
