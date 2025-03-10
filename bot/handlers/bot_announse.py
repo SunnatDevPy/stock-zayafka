@@ -66,9 +66,11 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
             buttons = reply_markup.inline_keyboard
         else:
             buttons = []
-
+        block = 0
+        good = 0
         markup = InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
         send_text = data.get('send_text')
+        await message.answer("✅ Ozgina kuting ⌛!")
         if send_text == 'user':
             users: list[BotUser] = await BotUser.all()
             for i in users:
@@ -89,14 +91,6 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
                             caption=text,
                             reply_markup=markup
                         )
-                    # Если есть документ (PDF, DOCX и т. д.)
-                    elif message.document:
-                        await bot.send_document(
-                            chat_id=i.id,
-                            document=message.document.file_id,
-                            caption=text,
-                            reply_markup=markup
-                        )
                     # Если просто текстовое сообщение
                     elif text:
                         await bot.send_message(
@@ -112,15 +106,19 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
                             await message.answer("Settings", reply_markup=settings())
                         return
 
-                    await message.answer("✅ Xabar kanalga yuborildi!")
-                    try:
-                        await message.edit_text("Settings", reply_markup=settings())
-                    except:
-                        await message.answer("Settings", reply_markup=settings())
-
+                    good += 1
                 except Exception as e:
-                    await message.answer(f"❌ Xatolik: {e}")
+                    block += 1
+            else:
+                await message.answer(f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
+
+                try:
+                    await message.edit_text("Settings", reply_markup=settings())
+                except:
+                    await message.answer("Settings", reply_markup=settings())
+
         else:
+
             users: list[Channels] = await Channels.all()
             for i in users:
                 try:
@@ -140,14 +138,6 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
                             caption=text,
                             reply_markup=markup
                         )
-                    # Если есть документ (PDF, DOCX и т. д.)
-                    elif message.document:
-                        await bot.send_document(
-                            chat_id=i.chat_id,
-                            document=message.document.file_id,
-                            caption=text,
-                            reply_markup=markup
-                        )
                     # Если просто текстовое сообщение
                     elif text:
                         await bot.send_message(
@@ -163,14 +153,15 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
                             await message.answer("Settings", reply_markup=settings())
                         return
 
-                    await message.answer("✅ Xabar kanalga yuborildi!")
-                    try:
-                        await message.edit_text("Settings", reply_markup=settings())
-                    except:
-                        await message.answer("Settings", reply_markup=settings())
-
+                    good += 1
                 except Exception as e:
-                    await message.answer(f"❌ Xatolik: {e}")
+                    block += 1
+            else:
+                await message.answer(f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
+                try:
+                    await message.edit_text("Settings", reply_markup=settings())
+                except:
+                    await message.answer("Settings", reply_markup=settings())
     else:
         if message.photo:
             await state.set_state(SendTextState.video)
@@ -229,23 +220,36 @@ async def finish_sending(callback: CallbackQuery, bot: Bot, state: FSMContext):
     text = data.get("text")
     links = data.get("links", [])
     send_text = data.get('send_text')
+    block = 0
+    good = 0
     if send_text == 'user':
         users: list[BotUser] = await BotUser.all()
-        try:
-            for i in users:
+        for i in users:
+            try:
                 await bot.send_photo(i.id, photo=photo, caption=text, reply_markup=link_from_channel(links))
-            await callback.message.answer("📢 Kanalga xabar yuborildi!")
-            await callback.message.answer("Settings", reply_markup=settings())
-        except:
-            await callback.message.answer("❌ Yuborishda xatolik, tekshirib ko'ring admin qilganmisiz kanalga.")
+                good += 1
+            except Exception as e:
+                block += 1
+        else:
+            await callback.message.answer(
+                f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
+            try:
+                await callback.message.edit_text("Settings", reply_markup=settings())
+            except:
+                await callback.message.answer("Settings", reply_markup=settings())
     else:
         users: list[Channels] = await Channels.all()
-        try:
-            for i in users:
+        for i in users:
+            try:
                 await bot.send_photo(i.chat_id, photo=photo, caption=text, reply_markup=link_from_channel(links))
-            await callback.message.answer("📢 Kanalga xabar yuborildi!")
-            await callback.message.answer("Settings", reply_markup=settings())
-        except:
-            await callback.message.answer("❌ Yuborishda xatolik, tekshirib ko'ring admin qilganmisiz kanalga.")
-
+                good += 1
+            except Exception as e:
+                block += 1
+        else:
+            await callback.message.answer(
+                f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
+            try:
+                await callback.message.edit_text("Settings", reply_markup=settings())
+            except:
+                await callback.message.answer("Settings", reply_markup=settings())
     await state.clear()
