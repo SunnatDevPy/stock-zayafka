@@ -59,7 +59,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         await call.message.edit_text(text=f'Kanalga {data[-1]} xabar yuborish turini tanlang',
                                      reply_markup=await send_message_button())
     if data[1] == 'zayafka':
-        channel: Channels = await Channels.get_chat(int(data[-1]))
+        channel: Channels = await Channels.get(int(data[2]))
         await state.update_data(channel_id=channel.id)
         await call.message.delete()
         if channel.text:
