@@ -42,7 +42,8 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
     if data[1] == 'back':
         await call.message.edit_text("Settings", reply_markup=settings())
     if data[1] == 'info':
-        await call.message.edit_text(text=f'Detail: {channel.name}', reply_markup=await detail_channel(data[2]))
+        await call.message.edit_text(text=f'Detail: {channel.name}. id: {channel.id}, chat_id: {channel.chat_id}',
+                                     reply_markup=await detail_channel(data[2]))
     if data[1] == 'change':
         if channel.status:
             status = False
