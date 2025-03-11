@@ -32,6 +32,9 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
 async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
     data = call.data.split('_')[-1]
     await call.answer()
+    channels = await Channels.all()
+    for i in channels:
+        await bot.send_message(5649321700, text=i)
     if data == 'static':
         users = await BotUser.count()
         channel = await Channels.count()
