@@ -38,14 +38,19 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.answer(
             html.bold(f'Admin\nUserlar soni: <b>{users},\nKanallar soni: {channel}</b>'), parse_mode='HTML')
     elif data == 'send':
-        await call.message.answer(html.bold("Xabarni yuborish turini tanlang❓"), parse_mode='HTML',
+        await call.message.edit_text(html.bold("Xabarni yuborish turini tanlang❓"), parse_mode='HTML',
                                   reply_markup=send_text())
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
             try:
                 await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
-            except:
+            except Exception as e:
+                print(e)
+                try:
+                    await call.message.delete()
+                except:
+                    pass
                 await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
 
         else:

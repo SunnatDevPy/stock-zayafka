@@ -1,3 +1,4 @@
+import asyncio
 import re
 
 from aiogram import Router, F, Bot
@@ -24,15 +25,48 @@ class SendTextState(StatesGroup):
     confirm = State()
 
 
+async def send_message_to_users(bot, users, message, text, markup):
+    tasks = []
+    good = 0
+    block = 0
+
+    for user in users:
+        tasks.append(send_individual_message(bot, user.id, message, text, markup))
+
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for result in results:
+        if isinstance(result, Exception):
+            block += 1
+        else:
+            good += 1
+
+    await message.answer(f"📊 Xabar yuborish statistikasi:\n✅ Qabul qildi: {good}, 🚫 Block qilgandlar: {block}")
+
+
+async def send_individual_message(bot, chat_id, message, text, markup):
+    try:
+        if message.photo:
+            await bot.send_photo(chat_id=chat_id, photo=message.photo[-1].file_id, caption=text, reply_markup=markup)
+        elif message.video:
+            await bot.send_video(chat_id=chat_id, video=message.video.file_id, caption=text, reply_markup=markup)
+        elif text:
+            await bot.send_message(chat_id=chat_id, text=text, reply_markup=markup)
+        return True
+    except Exception:
+        return False
+
+
 @bot_anons_router.callback_query(F.data.startswith('send_'))
 async def leagues_handler(call: CallbackQuery, state: FSMContext):
     data = call.data.split('_')[-1]
     await call.answer()
     if data == 'user':
-        await call.message.answer("Userlar uchun xabar yuborish usulini tanlang", reply_markup=send_text_type('user'))
+        await call.message.edit_text("Userlar uchun xabar yuborish usulini tanlang",
+                                     reply_markup=send_text_type('user'))
     if data == 'channel':
-        await call.message.answer("Kanallar uchun xabar yuborish usulini tanlang",
-                                  reply_markup=send_text_type('channel'))
+        await call.message.edit_text("Kanallar uchun xabar yuborish usulini tanlang",
+                                     reply_markup=send_text_type('channel'))
     if data == 'back':
         await state.clear()
         await call.message.edit_text("Settings", reply_markup=settings())
@@ -59,6 +93,109 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
     if data.get('status') == 'forward':
 
+        # text = message.text or message.caption
+        # reply_markup = message.reply_markup
+        #
+        # if reply_markup and isinstance(reply_markup, InlineKeyboardMarkup):
+        #     buttons = reply_markup.inline_keyboard
+        # else:
+        #     buttons = []
+        # block = 0
+        # good = 0
+        # markup = InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
+        # send_text = data.get('send_text')
+        # await message.answer("✅ Ozgina kuting ⌛!")
+        # if send_text == 'user':
+        #     users: list[BotUser] = await BotUser.all()
+        #     for i in users:
+        #         try:
+        #             # Если в пересланном сообщении есть фото
+        #             if message.photo:
+        #                 await bot.send_photo(
+        #                     chat_id=i.id,
+        #                     photo=message.photo[-1].file_id,
+        #                     caption=text,
+        #                     reply_markup=markup
+        #                 )
+        #             # Если есть видео
+        #             elif message.video:
+        #                 await bot.send_video(
+        #                     chat_id=i.id,
+        #                     video=message.video.file_id,
+        #                     caption=text,
+        #                     reply_markup=markup
+        #                 )
+        #             # Если просто текстовое сообщение
+        #             elif text:
+        #                 await bot.send_message(
+        #                     chat_id=i.id,
+        #                     text=text,
+        #                     reply_markup=markup
+        #                 )
+        #             else:
+        #                 await message.answer("⚠️ Bu turdagi xabarni bot yuborolmaydi.")
+        #                 try:
+        #                     await message.edit_text("Settings", reply_markup=settings())
+        #                 except:
+        #                     await message.answer("Settings", reply_markup=settings())
+        #                 return
+        #
+        #             good += 1
+        #         except Exception as e:
+        #             block += 1
+        #     else:
+        #         await message.answer(f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
+        #
+        #         try:
+        #             await message.edit_text("Settings", reply_markup=settings())
+        #         except:
+        #             await message.answer("Settings", reply_markup=settings())
+        #
+        # else:
+        #
+        #     users: list[Channels] = await Channels.all()
+        #     for i in users:
+        #         try:
+        #             if message.photo:
+        #                 await bot.send_photo(
+        #                     chat_id=i.chat_id,
+        #                     photo=message.photo[-1].file_id,
+        #                     caption=text,
+        #                     reply_markup=markup
+        #                 )
+        #             # Если есть видео
+        #             elif message.video:
+        #                 await bot.send_video(
+        #                     chat_id=i.chat_id,
+        #                     video=message.video.file_id,
+        #                     caption=text,
+        #                     reply_markup=markup
+        #                 )
+        #             # Если просто текстовое сообщение
+        #             elif text:
+        #                 await bot.send_message(
+        #                     chat_id=i.chat_id,
+        #                     text=text,
+        #                     reply_markup=markup
+        #                 )
+        #             else:
+        #                 await message.answer("⚠️ Bu turdagi xabarni bot yuborolmaydi.")
+        #                 try:
+        #                     await message.edit_text("Settings", reply_markup=settings())
+        #                 except:
+        #                     await message.answer("Settings", reply_markup=settings())
+        #                 return
+        #
+        #             good += 1
+        #             print(good)
+        #         except Exception as e:
+        #             block += 1
+        #     else:
+        #         await message.answer(f"Xabar yuborish statistikasi:\nQabul qildi: {good},\nBlock qilgandlar: {block}")
+        #         try:
+        #             await message.edit_text("Settings", reply_markup=settings())
+        #         except:
+        #             await message.answer("Settings", reply_markup=settings())
         text = message.text or message.caption
         reply_markup = message.reply_markup
 
@@ -66,102 +203,18 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
             buttons = reply_markup.inline_keyboard
         else:
             buttons = []
-        block = 0
-        good = 0
+
         markup = InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
         send_text = data.get('send_text')
+
         await message.answer("✅ Ozgina kuting ⌛!")
+
         if send_text == 'user':
-            users: list[BotUser] = await BotUser.all()
-            for i in users:
-                try:
-                    # Если в пересланном сообщении есть фото
-                    if message.photo:
-                        await bot.send_photo(
-                            chat_id=i.id,
-                            photo=message.photo[-1].file_id,
-                            caption=text,
-                            reply_markup=markup
-                        )
-                    # Если есть видео
-                    elif message.video:
-                        await bot.send_video(
-                            chat_id=i.id,
-                            video=message.video.file_id,
-                            caption=text,
-                            reply_markup=markup
-                        )
-                    # Если просто текстовое сообщение
-                    elif text:
-                        await bot.send_message(
-                            chat_id=i.id,
-                            text=text,
-                            reply_markup=markup
-                        )
-                    else:
-                        await message.answer("⚠️ Bu turdagi xabarni bot yuborolmaydi.")
-                        try:
-                            await message.edit_text("Settings", reply_markup=settings())
-                        except:
-                            await message.answer("Settings", reply_markup=settings())
-                        return
-
-                    good += 1
-                except Exception as e:
-                    block += 1
-            else:
-                await message.answer(f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
-
-                try:
-                    await message.edit_text("Settings", reply_markup=settings())
-                except:
-                    await message.answer("Settings", reply_markup=settings())
-
+            users = await BotUser.all()
         else:
+            users = await Channels.all()
 
-            users: list[Channels] = await Channels.all()
-            for i in users:
-                try:
-                    # Если в пересланном сообщении есть фото
-                    if message.photo:
-                        await bot.send_photo(
-                            chat_id=i.chat_id,
-                            photo=message.photo[-1].file_id,
-                            caption=text,
-                            reply_markup=markup
-                        )
-                    # Если есть видео
-                    elif message.video:
-                        await bot.send_video(
-                            chat_id=i.chat_id,
-                            video=message.video.file_id,
-                            caption=text,
-                            reply_markup=markup
-                        )
-                    # Если просто текстовое сообщение
-                    elif text:
-                        await bot.send_message(
-                            chat_id=i.chat_id,
-                            text=text,
-                            reply_markup=markup
-                        )
-                    else:
-                        await message.answer("⚠️ Bu turdagi xabarni bot yuborolmaydi.")
-                        try:
-                            await message.edit_text("Settings", reply_markup=settings())
-                        except:
-                            await message.answer("Settings", reply_markup=settings())
-                        return
-
-                    good += 1
-                except Exception as e:
-                    block += 1
-            else:
-                await message.answer(f"Xabar yuborish statistikasi\n Qabul qildi: {good},\nBlock qilgandlar: {block}")
-                try:
-                    await message.edit_text("Settings", reply_markup=settings())
-                except:
-                    await message.answer("Settings", reply_markup=settings())
+        await send_message_to_users(bot, users, message, text, markup)
     else:
         if message.photo:
             await state.set_state(SendTextState.video)
