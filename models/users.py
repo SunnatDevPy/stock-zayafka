@@ -16,11 +16,11 @@ class BotUser(BaseModel):
 
 class Channels(BaseModel):
     chat_id: Mapped[int] = mapped_column(BigInteger)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(nullable=True)
     text: Mapped[str] = mapped_column(nullable=True)
     photo: Mapped[str] = mapped_column(nullable=True)
     video: Mapped[str] = mapped_column(nullable=True)
-    status: Mapped[bool]
+    status: Mapped[bool] = mapped_column(nullable=True)
     link: Mapped[str] = mapped_column(nullable=True)
 
 
