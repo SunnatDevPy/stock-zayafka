@@ -116,7 +116,7 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
         for row in reply_markup.inline_keyboard:
             for button in row:
                 if button.url:
-                    await Buttons.create(chat_id=channel.id, name=button.text, link=button.url)
+                    await Buttons.create(channel_id=channel.id, name=button.text, link=button.url)
     await message.answer_photo(photo=channel.photo, caption=channel.text,
                                reply_markup=await detail_message_channel(channel.id))
     await state.clear()
