@@ -63,8 +63,11 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         await state.update_data(channel_id=channel.id)
         await call.message.delete()
         if channel.text:
-            await call.message.answer_photo(photo=channel.photo, caption=channel.text,
-                                            reply_markup=await detail_message_channel(channel.id))
+            try:
+                await call.message.answer_photo(photo=channel.photo, caption=channel.text,
+                                                reply_markup=await detail_message_channel(channel.id))
+            except:
+                await call.message.answer(text=channel.text, reply_markup=await detail_message_channel(channel.id))
         else:
             await state.set_state(ZayafkaState.text)
             await call.message.answer(text="Tayyor malumotni jo'nating")
