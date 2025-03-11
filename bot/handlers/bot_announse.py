@@ -42,7 +42,7 @@ async def send_message_to_users(bot, users, message, text, markup):
             good += 1
 
     await message.answer(f"📊 Xabar yuborish statistikasi:\n✅ Qabul qildi: {good}, 🚫 Block qilgandlar: {block}")
-
+    print(block, good)
 
 async def send_individual_message(bot, chat_id, message, text, markup):
     try:
