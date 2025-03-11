@@ -91,7 +91,7 @@ async def on_bot_added_to_channel(update: ChatMemberUpdated, bot: Bot):
         old_status = update.old_chat_member.status
 
         if new_status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR] and old_status != new_status:
-            channel = await Channels.get(update.chat.id)
+            channel = await Channels.get_chat(update.chat.id)
             if channel is None:
                 await Channels.create(chat_id=update.chat.id, name=update.chat.title, status=True)
                 channels_ = await Channels.all()
