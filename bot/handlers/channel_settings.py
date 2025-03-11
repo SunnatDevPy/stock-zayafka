@@ -72,7 +72,10 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
         await call.message.delete()
         await Channels.delete(int(data[2]))
         channels_ = await Channels.all()
-        await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
+        try:
+            await call.message.edit_text(text='Kanallar', reply_markup=await channels(channels_))
+        except:
+            await call.message.answer(text='Kanallar', reply_markup=await channels(channels_))
 
 
 @channel_router.callback_query(F.data.startswith('type_'))
