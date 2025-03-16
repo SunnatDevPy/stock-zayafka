@@ -92,8 +92,8 @@ def zayafka_change(status):
 
 def confirm_inl():
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text='✅Tasdiqlash✅', callback_data=f'confirm_network'),
-              InlineKeyboardButton(text="❌Toxtatish❌", callback_data=f'cancel_network')])
+    ikb.add(*[InlineKeyboardButton(text='✅Tasdiqlash✅', callback_data=f'confirm_networkchannels'),
+              InlineKeyboardButton(text="❌Toxtatish❌", callback_data=f'cancel_networkchannels')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 

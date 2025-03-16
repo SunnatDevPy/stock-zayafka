@@ -21,6 +21,7 @@ def Find(string):
 
 class ForwardState(StatesGroup):
     text = State()
+    confirm = State()
 
 
 class ZayafkaState(StatesGroup):
@@ -128,65 +129,27 @@ async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
 @channel_router.message(ForwardState.text)
 async def leagues_handler(message: Message, state: FSMContext, bot: Bot):
     data = await state.get_data()
-
     text = message.text or message.caption
     reply_markup = message.reply_markup
 
-    if reply_markup and isinstance(reply_markup, InlineKeyboardMarkup):
-        buttons = reply_markup.inline_keyboard
+    buttons = reply_markup.inline_keyboard if reply_markup and isinstance(reply_markup, InlineKeyboardMarkup) else []
+
+    buttons.append([
+        InlineKeyboardButton(text="✅ Jo'natish", callback_data="message_send"),
+        InlineKeyboardButton(text="❌ Bekor qilish", callback_data="message_cancel"),
+    ])
+
+    new_markup = InlineKeyboardMarkup(inline_keyboard=buttons)
+
+    await state.update_data(text=text, buttons=buttons, media=message.photo[
+        -1].file_id if message.photo else message.video.file_id if message.video else None)
+
+    if message.photo:
+        await message.answer_photo(photo=message.photo[-1].file_id, caption=text, reply_markup=new_markup)
+    elif message.video:
+        await message.answer_video(video=message.video.file_id, caption=text, reply_markup=new_markup)
     else:
-        buttons = []
-
-    markup = InlineKeyboardMarkup(inline_keyboard=buttons) if buttons else None
-
-    try:
-        # Если в пересланном сообщении есть фото
-        if message.photo:
-            await bot.send_photo(
-                chat_id=data.get('channel_id'),
-                photo=message.photo[-1].file_id,
-                caption=text,
-                reply_markup=markup
-            )
-        # Если есть видео
-        elif message.video:
-            await bot.send_video(
-                chat_id=data.get('channel_id'),
-                video=message.video.file_id,
-                caption=text,
-                reply_markup=markup
-            )
-        # Если есть документ (PDF, DOCX и т. д.)
-        elif message.document:
-            await bot.send_document(
-                chat_id=data.get('channel_id'),
-                document=message.document.file_id,
-                caption=text,
-                reply_markup=markup
-            )
-        # Если просто текстовое сообщение
-        elif text:
-            await bot.send_message(
-                chat_id=data.get('channel_id'),
-                text=text,
-                reply_markup=markup
-            )
-        else:
-            await message.answer("⚠️ Bu turdagi xabarni bot yuborolmaydi.")
-            try:
-                await message.edit_text("Settings", reply_markup=settings())
-            except:
-                await message.answer("Settings", reply_markup=settings())
-            return
-
-        await message.answer("✅ Xabar kanalga yuborildi!")
-        try:
-            await message.edit_text("Settings", reply_markup=settings())
-        except:
-            await message.answer("Settings", reply_markup=settings())
-
-    except Exception as e:
-        await message.answer(f"❌ Xatolik: {e}")
+        await message.answer(text=text, reply_markup=new_markup)
 
     await state.clear()
 
@@ -199,6 +162,35 @@ async def leagues_handler(message: Message, state: FSMContext):
         await message.answer("Tekst kiriting")
     else:
         await message.answer("Rasim yuboring")
+
+
+@channel_router.callback_query(F.data.startswith('message_'))
+async def send_to_channel(callback_query: CallbackQuery, state: FSMContext, bot: Bot):
+    call = callback_query.data.split('_')[-1]
+    if call == 'send':
+        data = await state.get_data()
+        channel_id = data.get("channel_id")  # Получаем ID канала
+        text = data.get("text")
+        media = data.get("media")
+        buttons = data.get("buttons")
+
+        markup = InlineKeyboardMarkup(
+            inline_keyboard=buttons[:-1]) if buttons else None
+
+        if media:
+            if callback_query.message.photo:
+                await bot.send_photo(chat_id=channel_id, photo=media, caption=text, reply_markup=markup)
+            elif callback_query.message.video:
+                await bot.send_video(chat_id=channel_id, video=media, caption=text, reply_markup=markup)
+        else:
+            await bot.send_message(chat_id=channel_id, text=text, reply_markup=markup)
+        channel = await Channels.get(int(channel_id))
+        await callback_query.message.answer(f"📢 Xabar kanalga yuborildi: <b>{channel.name}</b> ✅!", parse_mode='html')
+    else:
+        await callback_query.message.delete()
+        await callback_query.message.answer("❌ Xabar yuborish rad etildi.")
+        await callback_query.message.answer("Settings", reply_markup=settings())
+    await state.clear()
 
 
 @channel_router.message(SendTextChannelState.text)
@@ -244,12 +236,13 @@ async def finish_sending(callback: CallbackQuery, bot: Bot, state: FSMContext):
     text = data.get("text")
     links = data.get("links", [])
     channel_id = data.get("channel_id")
-
+    channel = await Channels.get(int(channel_id))
+    await callback.message.delete()
     try:
         await bot.send_photo(channel_id, photo=photo, caption=text, reply_markup=link_from_channel(links))
-        await callback.message.answer("📢 Kanalga xabar yuborildi!")
+        await callback.message.answer(f"📢 Kanalga xabar yuborildi: <b>{channel.name}</b>!", parse_mode='html')
         await callback.message.answer("Settings", reply_markup=settings())
     except:
         await callback.message.answer("❌ Yuborishda xatolik, tekshirib ko'ring admin qilganmisiz kanalga.")
-
+        await callback.message.answer("Settings", reply_markup=settings())
     await state.clear()
