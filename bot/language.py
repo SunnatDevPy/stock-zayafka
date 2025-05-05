@@ -25,7 +25,7 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         try:
             await BotUser.create(id=from_user.id, first_name=from_user.first_name,
                                  last_name=from_user.last_name,
-                                 username=from_user.username)
+                                 username=from_user.username, is_premium=from_user.is_premium)
         except:
             await bot.send_message(5649321700, f'user: {from_user}')
         if call.from_user.id in [5649321700, 1353080275]:
@@ -33,6 +33,7 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         else:
             await call.message.answer(f"{salom} {call.from_user.first_name}", reply_markup=menu())
     else:
+        await BotUser.update(call.from_user.id, is_premium=call.from_user.is_premium)
         if call.from_user.id in [5649321700, 1353080275]:
             await call.message.answer(f'{salom} Admin {call.from_user.first_name}', reply_markup=menu(admin=True))
         else:

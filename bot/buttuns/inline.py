@@ -27,6 +27,7 @@ def menu(admin=False):
 def settings():
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="Userlar soni", callback_data='settings_static'),
+              InlineKeyboardButton(text="Premiumlar soni", callback_data='settings_premium'),
               InlineKeyboardButton(text="➕Kanallar➕", callback_data='settings_subscribe'),
               InlineKeyboardButton(text="📝Xabar jo'natish📝", callback_data='settings_send'),
               InlineKeyboardButton(text="Umumiy zayafka", callback_data='settings_zayafka'),

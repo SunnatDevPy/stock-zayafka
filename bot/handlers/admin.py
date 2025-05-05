@@ -39,7 +39,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
             html.bold(f'Admin\nUserlar soni: <b>{users},\nKanallar soni: {channel}</b>'), parse_mode='HTML')
     elif data == 'send':
         await call.message.edit_text(html.bold("Xabarni yuborish turini tanlang❓"), parse_mode='HTML',
-                                  reply_markup=send_text())
+                                     reply_markup=send_text())
     elif data == 'subscribe':
         channels_ = await Channels.all()
         if channels_:
@@ -74,6 +74,14 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         else:
             await state.set_state(ZayafkaText.photo)
             await call.message.answer('Rasim yuboring')
+    elif data == 'premium':
+        await call.message.delete()
+        await call.message.answer("Bir oz kuting ... ⏳")
+        users_count = await BotUser.count()
+        count_premium = await BotUser.count_is_premium(True)
+        text = f"Userlar soni: {users_count}\nPremium userlar soni: {count_premium}\n"
+        await call.message.answer(text)
+        await call.message.answer("Settings", reply_markup=settings())
 
 
 @admin_router.message(ZayafkaText.photo)

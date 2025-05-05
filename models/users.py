@@ -9,6 +9,7 @@ class BotUser(BaseModel):
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(255), nullable=True)
+    is_premium: Mapped[bool] = mapped_column(nullable=True)
 
     def __str__(self):
         return super().__str__() + f" - {self.username}"
