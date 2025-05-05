@@ -79,7 +79,8 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.answer("Bir oz kuting ... ⏳")
         users_count = await BotUser.count()
         count_premium = await BotUser.count_is_premium(True)
-        text = f"Userlar soni: {users_count}\nPremium userlar soni: {count_premium}\n"
+        not_premium = await BotUser.count_is_premium(False)
+        text = f"Barcha Userlar soni: {users_count}\nPremium userlar soni: {count_premium}\nPremium yo'q: {not_premium}"
         await call.message.answer(text)
         await call.message.answer("Settings", reply_markup=settings())
 
