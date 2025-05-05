@@ -101,7 +101,7 @@ class AbstractClass:
 
     @classmethod
     async def count_is_premium(cls, bool_):
-        query = select(func.count()).select_from(cls.is_premium == bool_)
+        query = select(func.count()).where(cls.is_premium == bool_)
         return (await db.execute(query)).scalar()
 
     @classmethod
